@@ -22,21 +22,16 @@ import {
   MenuItem,
   MenuList,
   Image,
-  Button,
-  useColorMode,
 } from "@chakra-ui/react";
 import {
   FiHome,
   FiTrendingUp,
   FiCompass,
-  FiStar,
-  FiSettings,
   FiMenu,
-  FiBell,
   FiChevronDown,
 } from "react-icons/fi";
 
-import { AiOutlineMessage } from "react-icons/ai";
+import { AiOutlineMessage, AiOutlineSetting } from "react-icons/ai";
 import { IconType } from "react-icons";
 
 import React, { ReactNode, useEffect } from "react";
@@ -69,6 +64,7 @@ const LinkItems: Array<LinkItemProps> = [
   { name: "Classes", icon: FiTrendingUp, href: "/classes" }, // Example href
   { name: "Services", icon: FiCompass, href: "/services" }, // Example href
   { name: "Messages", icon: AiOutlineMessage, href: "/messages" }, // Example href
+  { name: "Actions", icon: AiOutlineSetting, href: "/actions" },
 ];
 
 const SidebarContent = ({ onClose, ...rest }: SidebarProps) => {
@@ -152,8 +148,22 @@ const MobileNav = ({ onOpen, ...rest }: MobileProps) => {
         icon={<FiMenu />}
       />
       <Box className="flex gap-1" width={"fit-content"} height={20}>
-        <Image src="/ribbon.png" alt="Ribbon" width={"7"} objectFit={"cover"} />
-        <Image src="/binuslogo.png" alt="Logo" height={"20"} padding={"2"} />
+        <Link href="/">
+          <Box display="flex">
+            <Image
+              src="/ribbon.png"
+              alt="Ribbon"
+              width={"7"}
+              objectFit={"cover"}
+            />
+            <Image
+              src="/binuslogo.png"
+              alt="Logo"
+              height={"20"}
+              padding={"2"}
+            />
+          </Box>
+        </Link>
       </Box>
 
       <HStack spacing={{ base: "0", md: "6" }}>

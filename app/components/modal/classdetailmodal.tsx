@@ -9,11 +9,14 @@ import {
   ModalHeader,
   ModalOverlay,
   Flex,
-  Input, // Import Flex component
+  Input,
+  Box,
+  Text, // Import Flex component
 } from "@chakra-ui/react";
 import { IoMdArrowBack } from "react-icons/io";
 import { ClassDetail } from "@/app/interfaces/interfaces";
 import CustomInput from "../custominput";
+import { AiOutlineCheck } from "react-icons/ai";
 
 interface ClassDetailModalProps {
   isOpen: boolean;
@@ -116,24 +119,28 @@ const ClassDetailModal: React.FC<ClassDetailModalProps> = ({
               />
             )}
             <span>
-              {isGroupView
-                ? "Group Code Modal Title"
-                : "Class Detail Modal Title"}
+              {isGroupView ? "Group Code Modal Title" : "Verification Code"}
             </span>
           </Flex>
         </ModalHeader>
         <ModalCloseButton />
         <ModalBody>
           {classDetail.class_line_group_id == null ? (
-            <CustomInput
-              onSubmit={(value: string) => {
-                console.log(value);
-                setLinkFormData((prevData) => ({
-                  ...prevData,
-                  linkCode: value,
-                }));
-              }}
-            />
+            <Box className="flex gap-2 flex-col">
+              <Text>Please enter the verification code sent to your group</Text>
+              <CustomInput
+                onSubmit={(value: string) => {
+                  console.log(value);
+                  setLinkFormData((prevData) => ({
+                    ...prevData,
+                    linkCode: value,
+                  }));
+                }}
+              />
+              <Text fontSize="xs">
+                Didn't get a code? <b> Click to resend</b>
+              </Text>
+            </Box>
           ) : (
             <Button onClick={handleUnlink}>Unlink Group</Button>
           )}

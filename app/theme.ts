@@ -6,7 +6,11 @@ const theme = extendTheme({
   config: {
     initialColorMode: 'light',
     useSystemColorMode: false,
+    
   },
+
+ 
+
   colors: {
     // Define your custom colors here
     primary: {
@@ -25,13 +29,24 @@ const theme = extendTheme({
       100: '#1798d4',
       200: "#1e7898",
     },
+    
+
 
     accent:{
 
     },
+    myCustomScheme: {
+      50: '#1798d4',
+      100: '#1798d4',
+      200: '#1798d4',
+      // ... add more color variants for your custom scheme
+    },
+
     
     // ... add more custom colors
   },
+  
+  
   
 });
 

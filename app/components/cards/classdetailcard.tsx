@@ -17,13 +17,16 @@ import {
   Text,
   useDisclosure,
 } from "@chakra-ui/react";
-import { Class, ClassDetail, ClassLineGroup } from "../interfaces/interfaces";
+import {
+  Class,
+  ClassDetail,
+  ClassLineGroup,
+} from "../../interfaces/interfaces";
 import { PiClipboardTextLight } from "react-icons/pi";
 import { RiGroupLine } from "react-icons/ri";
 import { GrStatusGood } from "react-icons/gr";
-import LINELogo from "./customlogo";
-import ClassDetailModal from "./modal/classdetailmodal";
-import GroupCodeModal from "./modal/groupcodemodal";
+import LINELogo from "../customlogo";
+import ClassDetailModal from "../modal/classdetailmodal";
 
 interface Data {
   classDetail: ClassDetail;
@@ -52,16 +55,29 @@ export default function ClassDetailCard(props: Data) {
         </Box>
         <Box display="flex" className="items-center gap-2">
           <Image src="/linelogo.svg" />
-          <Text fontSize="sm">
+          <Text
+            fontWeight="bold"
+            fontSize="sm"
+            color={
+              props.classDetail.class_line_group_id == null
+                ? "gray.500"
+                : "green"
+            }
+          >
             {props.classDetail.class_line_group_id == null
-              ? "Unlinked"
+              ? "Not Linked"
               : "Linked"}
           </Text>
         </Box>
       </CardBody>
       <CardFooter>
         {/* {props.classDetail.class_line_group_id != null ? ( */}
-        <Button onClick={classDetailModalDisclosure.onOpen}>
+        <Button
+          onClick={classDetailModalDisclosure.onOpen}
+          colorScheme={
+            props.classDetail.class_line_group_id == null ? "green" : "blue"
+          }
+        >
           {props.classDetail.class_line_group_id == null ? "Link" : "Details"}
         </Button>
         {/* ) : ( */}

@@ -1,7 +1,8 @@
 export interface Class {
-  id: string;
-  name: string;
-  course_id: string;
+  classid: string;
+  classname: string;
+  courseid: string;
+
   is_active: number;
   is_global: number;
   is_nar_enabled: number;
@@ -13,7 +14,7 @@ export interface ClassLineGroup {
   last_linked_at: string;
 }
 
-export interface Courses {
+export interface Course {
   id: string;
   code: string;
   name: string;
@@ -25,6 +26,7 @@ export interface ClassDetail {
   classname: string;
   coursename: string;
   course_id: string;
+  coursecode: string;
   is_active: number;
   is_global: number;
   is_nar_enabled: number;
@@ -33,4 +35,10 @@ export interface ClassDetail {
   last_linked_at: Date;
   code: string;
   credit: number;
+}
+
+export interface CardData {
+  id: number;
+  title: string;
+  content: string;
 }
