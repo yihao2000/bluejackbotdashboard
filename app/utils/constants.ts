@@ -1,8 +1,8 @@
 export const API_URL = "http://localhost:3005"
 
-export const CLASSES_DETAIL_QUERY = `${API_URL}/query/classesdetail`
-export const LINKED_CLASSES_QUERY = `${API_URL}/query/linkedclasses`
-export const LINKED_CLASSES_COURSE_QUERY = `${API_URL}/query/linkedclassescourses`
+export const CLASSES_DETAIL_QUERY = `${API_URL}/classes/query/classesdetail`
+export const LINKED_CLASSES_QUERY = `${API_URL}/classes/query/linkedclasses`
+export const LINKED_CLASSES_COURSE_QUERY = `${API_URL}/courses/query/linkedclassescourses`
 
 
 export const queryLinkedClasses = async () => {
