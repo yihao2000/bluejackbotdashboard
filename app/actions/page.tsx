@@ -29,6 +29,7 @@ import ClassDetailCard from "../components/cards/classdetailcard";
 import SelectableCard from "../components/cards/selectablecard";
 import { SelectableButton } from "../components/buttons/selectablebutton";
 import { useToast } from "@chakra-ui/react";
+import { DatePicker } from "@orange_digital/chakra-datepicker";
 
 export default function Classes() {
   const [selectedClasses, setselectedClasses] = useState<string[]>([]);
@@ -36,7 +37,23 @@ export default function Classes() {
   const [selectedOption, setSelectedOption] = useState("");
   const [message, setMessage] = React.useState("");
   const [coursesList, setCoursesList] = useState<Course[]>();
+  const [startDate, setStartDate] = useState(new Date());
+
   const toast = useToast();
+
+  function formatTime(date: Date) {
+    return `${String(date.getHours()).padStart(2, "0")}:${String(
+      date.getMinutes()
+    ).padStart(2, "0")}`;
+  }
+
+  function handleTimeChange(newTime: string) {
+    const [hours, minutes] = newTime.split(":").map(Number);
+    const newDate = new Date(startDate);
+    newDate.setHours(hours);
+    newDate.setMinutes(minutes);
+    setStartDate(newDate);
+  }
 
   function clearSelectedClasses() {
     setselectedClasses([]);
@@ -55,17 +72,19 @@ export default function Classes() {
   };
 
   const handleAnnounceClick = async () => {
-    try {
-      await announceMessage(selectedClasses, message);
-    } catch (error) {
-      console.error("API Error:", error);
-      toast({
-        title: "Error",
-        description: "An error occurred while processing your request.",
-        status: "error",
-        duration: 5000, // Duration in milliseconds
-        isClosable: true, // Allow the user to close the toast
-      });
+    if (selectedOption == "announcemessage") {
+      try {
+        await announceMessage(selectedClasses, message);
+      } catch (error) {
+        console.error("API Error:", error);
+        toast({
+          title: "Error",
+          description: "An error occurred while processing your request.",
+          status: "error",
+          duration: 5000, // Duration in milliseconds
+          isClosable: true, // Allow the user to close the toast
+        });
+      }
     }
   };
 
@@ -231,27 +250,50 @@ export default function Classes() {
               </>
             )}
 
-            {selectedOption == "announcemessage" &&
-              selectedClasses.length != 0 && (
-                <>
-                  <Text>Please enter the announcement</Text>
-                  <Textarea
-                    value={message}
-                    onChange={handleInputChange}
-                    placeholder="Announcement length must be more than 5"
-                    size="md"
-                    resize="vertical"
-                    height="xs"
+            {selectedOption == "schedulemessage" && (
+              <>
+                <Text>Please select the scheduled message date</Text>
+                <Box width="sm" display="flex" gap="2">
+                  <DatePicker
+                    initialValue={startDate}
+                    onDateChange={(x) => {
+                      if (x !== null) {
+                        setStartDate(x);
+                      }
+                    }}
+                  ></DatePicker>
+                  <Input
+                    type="time"
+                    size="lg"
+                    value={formatTime(startDate)}
+                    onChange={(e) => {
+                      handleTimeChange(e.target.value);
+                    }}
                   />
+                </Box>
+              </>
+            )}
 
-                  {message.length > 4 && (
-                    <>
-                      <Button onClick={handleAnnounceClick}>Announce</Button>
-                    </>
-                  )}
-                  {}
-                </>
-              )}
+            {selectedClasses.length != 0 && (
+              <>
+                <Text>Please enter the announcement</Text>
+                <Textarea
+                  value={message}
+                  onChange={handleInputChange}
+                  placeholder="Announcement length must be more than 5"
+                  size="md"
+                  resize="vertical"
+                  height="xs"
+                />
+
+                {message.length > 4 && (
+                  <>
+                    <Button onClick={handleAnnounceClick}>Announce</Button>
+                  </>
+                )}
+                {}
+              </>
+            )}
           </Box>
         </main>
       </Nav>

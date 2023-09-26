@@ -22,6 +22,8 @@ import {
   MenuItem,
   MenuList,
   Image,
+  Select,
+  Divider,
 } from "@chakra-ui/react";
 import {
   FiHome,
@@ -34,21 +36,26 @@ import {
 import { AiOutlineMessage, AiOutlineSetting } from "react-icons/ai";
 import { IconType } from "react-icons";
 
-import React, { ReactNode, useEffect } from "react";
+import { CiLogout } from "react-icons/ci";
+
+import React, { ReactNode, useEffect, useState } from "react";
 import Link from "next/link";
 
 import { usePathname, useRouter } from "next/navigation";
+import { signOut } from "next-auth/react";
+import { Semester } from "../interfaces/interfaces";
+import { useSemester } from "../context/SemesterContext";
 
 interface LinkItemProps {
   name: string;
   icon: IconType;
-  href: string;
+  href?: string;
 }
 
 interface NavItemProps extends FlexProps {
   icon: IconType;
   children: React.ReactNode;
-  href: string;
+  href?: string;
 }
 
 interface MobileProps extends FlexProps {
@@ -92,6 +99,18 @@ const SidebarContent = ({ onClose, ...rest }: SidebarProps) => {
           {link.name}
         </NavItem>
       ))}
+
+      <Divider paddingY="4" />
+      <NavItem
+        icon={CiLogout}
+        key={"logout"}
+        onClick={() => {
+          signOut();
+        }}
+        position="relative" // Change position to relative
+      >
+        Logout
+      </NavItem>
     </Box>
   );
 };
@@ -101,7 +120,7 @@ const NavItem = ({ icon, children, href, ...rest }: NavItemProps) => {
 
   return (
     <Box style={{ textDecoration: "none" }} className="mb-1">
-      <Link href={href}>
+      <Link href={href ? href : ""}>
         <Flex
           bg={currentPath === href ? "secondary.25" : ""}
           align="center"
@@ -125,6 +144,21 @@ const NavItem = ({ icon, children, href, ...rest }: NavItemProps) => {
 };
 
 const MobileNav = ({ onOpen, ...rest }: MobileProps) => {
+  const { semesters, selectedSemester, setSelectedSemester } = useSemester();
+
+  const handleSemesterChange = (
+    event: React.ChangeEvent<HTMLSelectElement>
+  ) => {
+    const selectedSemesterID = event.target.value;
+    const newSelectedSemester = semesters?.find(
+      (s) => s.semesterID === selectedSemesterID
+    );
+
+    if (newSelectedSemester) {
+      setSelectedSemester(newSelectedSemester);
+    }
+  };
+
   return (
     <Flex
       // ml={{ base: 0, md: 60 }}
@@ -167,7 +201,19 @@ const MobileNav = ({ onOpen, ...rest }: MobileProps) => {
       </Box>
 
       <HStack spacing={{ base: "0", md: "6" }}>
-        <Flex alignItems={"center"}>
+        <Menu>
+          <Select
+            defaultValue={selectedSemester?.semesterID}
+            onChange={(x) => {
+              handleSemesterChange(x);
+            }}
+          >
+            {semesters?.map((x) => {
+              return <option value={x.semesterID}>{x.description}</option>;
+            })}
+          </Select>
+        </Menu>
+        {/* <Flex alignItems={"center"}>
           <Menu>
             <MenuButton
               py={2}
@@ -204,10 +250,16 @@ const MobileNav = ({ onOpen, ...rest }: MobileProps) => {
               <MenuItem>Profile</MenuItem>
 
               <MenuDivider />
-              <MenuItem>Sign out</MenuItem>
+              <MenuItem
+                onClick={() => {
+                  signOut();
+                }}
+              >
+                Sign out
+              </MenuItem>
             </MenuList>
           </Menu>
-        </Flex>
+        </Flex> */}
       </HStack>
     </Flex>
   );

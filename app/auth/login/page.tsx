@@ -9,19 +9,46 @@ import {
   useColorMode,
   InputGroup,
   InputLeftElement,
+  useToast,
 } from "@chakra-ui/react";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import ParticlesBackground from "@/app/components/background/ParticlesBackground";
 import { FaUser, FaLock } from "react-icons/fa";
 import { useRouter } from "next/navigation";
+import { signIn, useSession } from "next-auth/react";
 
 function LoginBox() {
-  const router = useRouter();
+  const toast = useToast();
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+
+  const [isError, setIsError] = useState("");
+
+  const logIn = async () => {
+    const result = await signIn("credentials", {
+      username: username,
+      password: password,
+      redirect: false,
+    });
+    if (result?.error == null) {
+      window.location.replace("/");
+    } else {
+      setIsError(result.error);
+      // toast({
+      //   title: "Error",
+      //   description: result?.error,
+      //   status: "error",
+      //   duration: 5000,
+      //   isClosable: true,
+      // });
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Hai");
-    await router.replace("/");
+    logIn();
   };
+
   return (
     <form onSubmit={handleSubmit}>
       <Box className="flex items-center justify-center min-h-screen">
@@ -47,7 +74,14 @@ function LoginBox() {
                   }}
                 />
               </InputLeftElement>
-              <Input mb="2" placeholder="Username" borderRadius="none" />
+              <Input
+                mb="2"
+                placeholder="Username"
+                borderRadius="none"
+                onChange={(e) => {
+                  setUsername(e.target.value);
+                }}
+              />
             </InputGroup>
           </Box>
           <Box>
@@ -64,11 +98,15 @@ function LoginBox() {
                 placeholder="Password"
                 borderRadius="none"
                 type="password"
+                onChange={(e) => {
+                  setPassword(e.target.value);
+                }}
               />
             </InputGroup>
           </Box>
           <Box justifyContent="center" width="full" display="flex">
             <Button
+              mb="2"
               width="full"
               bg="secondary.50"
               variant="solid"
@@ -80,6 +118,18 @@ function LoginBox() {
               Login
             </Button>
           </Box>
+          {isError != "" && (
+            <Box
+              justifyContent="center"
+              width="full"
+              display="flex"
+              backgroundColor="red"
+              p="3"
+              color="white"
+            >
+              {isError}
+            </Box>
+          )}
         </Box>
       </Box>
     </form>

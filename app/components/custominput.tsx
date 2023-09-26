@@ -1,5 +1,6 @@
 import React, { useState, ChangeEvent } from "react";
-import { Input, HStack, Button } from "@chakra-ui/react";
+import { HStack, Button } from "@chakra-ui/react";
+import { PinInput, PinInputField } from "@chakra-ui/react";
 
 type CustomInputProps = {
   onSubmit: (value: string) => void;
@@ -10,18 +11,11 @@ function CustomInput({ onSubmit }: CustomInputProps) {
   const [showSubmitButton, setShowSubmitButton] = useState(false);
 
   // Function to handle input change
-  const handleInputChange = (event: ChangeEvent<HTMLInputElement>) => {
-    const value = event.target.value;
+  const handleInputChange = (value: string) => {
+    setInputValue(value);
 
-    // Check if the input contains only numeric characters
-    if (value.length < 7) {
-      if (/^\d*$/.test(value)) {
-        setInputValue(value);
-
-        // Show the submit button when there are 6 characters
-        setShowSubmitButton(value.length === 6);
-      }
-    }
+    // Show the submit button when there are 4 characters
+    setShowSubmitButton(value.length === 4);
   };
 
   // Function to handle form submission
@@ -34,12 +28,16 @@ function CustomInput({ onSubmit }: CustomInputProps) {
 
   return (
     <HStack>
-      <Input
-        placeholder="Enter 6 digit code"
+      <PinInput
         value={inputValue}
         onChange={handleInputChange}
-        isInvalid={inputValue.length !== 6 && inputValue.length !== 0}
-      />
+        isInvalid={inputValue.length !== 4 && inputValue.length !== 0}
+      >
+        <PinInputField />
+        <PinInputField />
+        <PinInputField />
+        <PinInputField />
+      </PinInput>
       {showSubmitButton && (
         <Button colorScheme="teal" onClick={handleSubmit}>
           Link

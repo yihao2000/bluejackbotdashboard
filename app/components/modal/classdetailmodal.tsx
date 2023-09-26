@@ -11,37 +11,72 @@ import {
   Flex,
   Input,
   Box,
-  Text, // Import Flex component
+  Text,
+  Divider,
+  Tooltip,
+  useToast, // Import Flex component
 } from "@chakra-ui/react";
 import { IoMdArrowBack } from "react-icons/io";
-import { ClassDetail } from "@/app/interfaces/interfaces";
+import {
+  Class,
+  ClassLineGroup,
+  ClassLinkDetail,
+} from "@/app/interfaces/interfaces";
 import CustomInput from "../custominput";
 import { AiOutlineCheck } from "react-icons/ai";
+import { useQRCode } from "next-qrcode";
+import { checkClassLinked, linkClass } from "@/app/utils/constants";
+import {
+  transformClassSubjectFormat,
+  transformStringToDate,
+} from "@/app/utils/formatter";
+
+import { BsQuestionCircle } from "react-icons/bs";
 
 interface ClassDetailModalProps {
   isOpen: boolean;
   onClose: () => void;
-  classDetail: ClassDetail;
+  classLinkDetail: ClassLinkDetail;
   refreshPage: () => void;
+  selectedClass: Class;
 }
 
 const ClassDetailModal: React.FC<ClassDetailModalProps> = ({
   isOpen,
   onClose,
-  classDetail,
+  classLinkDetail,
   refreshPage,
+  selectedClass,
 }) => {
-  const [isGroupView, setIsGroupView] = useState(false);
+  useEffect(() => {
+    console.log(selectedClass.id);
+  }, []);
+  const { Canvas } = useQRCode();
+
+  const [classLineGroup, setClassLineGroup] = useState<ClassLineGroup[]>([]);
+
+  const toast = useToast();
+
+  const checkSpecificClassLinked = async () => {
+    checkClassLinked(selectedClass.id).then((x: Array<ClassLineGroup>) => {
+      setClassLineGroup(x);
+    });
+  };
+
+  useEffect(() => {
+    checkSpecificClassLinked();
+  }, [isOpen]);
 
   const [linkFormData, setLinkFormData] = useState({
-    cmd: "linkgroup",
-    classId: classDetail.class_id,
-    linkCode: "",
+    params: {
+      classID: selectedClass.id,
+      linkCode: "",
+    },
   });
 
   const [unlinkFormData, setUnlinkFormData] = useState({
     cmd: "unlinkgroup",
-    classId: classDetail.class_id,
+    classId: selectedClass.id,
   });
 
   const handleUnlink = () => {
@@ -71,34 +106,116 @@ const ClassDetailModal: React.FC<ClassDetailModalProps> = ({
       });
   };
 
-  useEffect(() => {
-    if (linkFormData.linkCode.length == 6) {
-      fetch("https://bluejackbot.jex.ink/server/manualrequest", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(linkFormData),
-      })
-        .then((response) => {
-          refreshPage();
-          if (response.ok) {
-            return response.json();
-          } else {
-            throw new Error("API request failed");
-          }
-        })
-        .then((data) => {
-          // Handle the API response data here
-          refreshPage();
-        })
-        .catch((error) => {
-          //   refreshPage();
-
-          // Handle any errors that occurred during the API request
-          console.error("API Error:", error);
-        });
+  const showResult = (res: any) => {
+    if (res.message != "Linking Successful") {
+      toast({
+        title: "Error",
+        description: res.message,
+        status: "error",
+        duration: 5000,
+        isClosable: true,
+      });
+    } else {
+      refreshPage();
     }
+  };
+
+  const handleLink = () => {
+    if (linkFormData.params.linkCode.length == 4) {
+      const { classID, linkCode } = linkFormData.params;
+      linkClass(classID, linkCode).then((res) => {
+        showResult(res);
+        // console.log("Handling Link");
+        // refreshPage();
+      });
+    }
+  };
+
+  const LinkModalBody: React.FC = () => {
+    return (
+      <>
+        <Box fontWeight="bold">
+          Bot {classLinkDetail.bot_name} has been assigned for you
+        </Box>
+        <Box className="flex gap-2 flex-col">
+          <Text>Add the bot by scanning the QR Code below !</Text>
+          <Box className="flex justify-center">
+            <Canvas
+              text={classLinkDetail.bot_invite_link}
+              options={{
+                errorCorrectionLevel: "M",
+                margin: 3,
+                scale: 4,
+                width: 200,
+                color: {
+                  // dark: "#010599FF",
+                  // light: "#FFBF60FF",
+                },
+              }}
+            />
+          </Box>
+        </Box>
+        <Box>
+          Invite the bot to your group and enter the given verification code
+        </Box>
+        <Box display="flex" justifyContent="center" mt="4">
+          <CustomInput
+            onSubmit={(value: string) => {
+              setLinkFormData((prevData) => ({
+                params: {
+                  ...prevData.params, // Preserve other params
+                  linkCode: value,
+                },
+              }));
+            }}
+          />
+        </Box>
+      </>
+    );
+  };
+
+  const DetailModalBody: React.FC = () => {
+    return (
+      <>
+        <Box fontWeight="bold"></Box>
+        <Box className="flex gap-2 flex-col">
+          <Text>
+            Course: <b>{transformClassSubjectFormat(selectedClass.subject)}</b>
+          </Text>
+
+          <Text>
+            Class: <b>{selectedClass.class}</b>
+          </Text>
+          <Text>
+            Assistants: <b>{selectedClass.assistant}</b>
+          </Text>
+          <Text>
+            Room: <b>{selectedClass.room}</b>
+          </Text>
+          <Text>
+            Total Students: <b>{selectedClass.totalStudent}</b>
+          </Text>
+          <Text>
+            Class Realization: <b>{selectedClass.realization}</b>
+          </Text>
+          <Divider p="2" />
+          <Box className="flex gap-2 flex-col">
+            <Text>
+              Assigned Bot: <b>{classLinkDetail.bot_name}</b>
+            </Text>
+            <Text>
+              Linked at:{" "}
+              <b>{transformStringToDate(classLineGroup[0].last_linked_at)}</b>
+            </Text>
+            {/* <Text>Linked at: {classLinkDetail}</Text> */}
+          </Box>
+        </Box>
+      </>
+    );
+  };
+
+  useEffect(() => {
+    handleLink();
   }, [linkFormData]);
 
   return (
@@ -107,52 +224,40 @@ const ClassDetailModal: React.FC<ClassDetailModalProps> = ({
       <ModalContent>
         <ModalHeader>
           <Flex alignItems="center" gap={2}>
-            {" "}
-            {/* Use Flex for alignment */}
-            {isGroupView && ( // Conditionally render the arrow button
-              <IoMdArrowBack
-                onClick={() => {
-                  // If in group view, go back to code view
-                  setIsGroupView(false);
-                }}
-                style={{ cursor: "pointer" }} // Add cursor style
-              />
-            )}
             <span>
-              {isGroupView ? "Group Code Modal Title" : "Verification Code"}
+              {classLineGroup?.length != 0 ? "Class Detail" : "Bot Linking"}
             </span>
           </Flex>
         </ModalHeader>
         <ModalCloseButton />
         <ModalBody>
-          {classDetail.class_line_group_id == null ? (
-            <Box className="flex gap-2 flex-col">
-              <Text>Please enter the verification code sent to your group</Text>
-              <CustomInput
-                onSubmit={(value: string) => {
-                  console.log(value);
-                  setLinkFormData((prevData) => ({
-                    ...prevData,
-                    linkCode: value,
-                  }));
-                }}
-              />
-              <Text fontSize="xs">
-                Didn't get a code? <b> Click to resend</b>
-              </Text>
-            </Box>
+          {classLineGroup?.length != 0 ? (
+            <DetailModalBody />
           ) : (
-            <Button onClick={handleUnlink}>Unlink Group</Button>
+            <LinkModalBody />
           )}
         </ModalBody>
 
-        <ModalFooter>
+        <ModalFooter display="flex" justifyContent="space-between">
+          <Box display="flex" alignItems="center" gap="2">
+            {classLineGroup.length != 0 && (
+              <>
+                <Text fontSize="sm">How to unlink</Text>
+                <Tooltip
+                  label="To unlink, simply remove the bot from the line group"
+                  fontSize="md"
+                  shouldWrapChildren
+                >
+                  <BsQuestionCircle />
+                </Tooltip>
+              </>
+            )}
+          </Box>
           <Button
-            colorScheme="blue"
+            colorScheme="red"
             mr={3}
             onClick={() => {
               onClose();
-              setIsGroupView(false);
             }}
           >
             Close

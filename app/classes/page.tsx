@@ -11,67 +11,83 @@ import {
   useColorMode,
   useToast,
 } from "@chakra-ui/react";
-import { Class, ClassDetail } from "../interfaces/interfaces";
-import ClassCard from "../components/cards/classdetailcard";
+import { Class, ClassLineGroup } from "../interfaces/interfaces";
 import { BsFilter } from "react-icons/bs";
 import { useEffect, useState } from "react";
 import { AiOutlineSearch } from "react-icons/ai";
-import { CLASSES_DETAIL_QUERY, queryClassesDetail } from "../utils/constants";
+import {
+  queryAssistantClasses,
+  queryLinkedAssistantClasses,
+} from "../utils/constants";
 import ClassDetailCard from "../components/cards/classdetailcard";
+import { useSession } from "next-auth/react";
+import { useSemester } from "../context/SemesterContext";
+import { transformClassApiReponse } from "../utils/formatter";
+import { Skeleton } from "@chakra-ui/react";
+import { fetchData } from "next-auth/client/_utils";
 
 export default function Classes() {
   const [value, setValue] = useState("");
   const handleChange = (event: React.FormEvent<HTMLInputElement>) =>
     setValue(event.currentTarget.value);
 
-  const [selectedFilter, setSelectedFilter] = useState("all"); // Added selectedFilter state
-  const [classesDetail, setClassesDetail] = useState<Array<ClassDetail>>([]);
+  const [selectedFilter, setSelectedFilter] = useState("all");
+  const [classes, setClasses] = useState<Array<Class>>([]);
+  const [classLineGroups, setClassLineGroups] = useState<
+    ClassLineGroup[] | null
+  >(null);
   const [refresh, setRefresh] = useState(false);
+  const [loading, setLoading] = useState(true); // Add a loading state
   const toast = useToast();
+
+  const session = useSession();
+  const { selectedSemester } = useSemester();
 
   const refreshPage = () => {
     setRefresh(!refresh);
   };
 
-  function queryClassDetail() {
-    queryClassesDetail()
-      .then((result) => {
-        setClassesDetail(result);
-      })
-      .catch((error) => {
-        console.error("Error fetching classes courses:", error);
-        toast({
-          title: "Error",
-          description: "An error occurred while fetching classes courses.",
-          status: "error",
-          duration: 5000,
-          isClosable: true,
-        });
-      });
+  function checkClassIdLinked(id: string) {
+    const isLinked = !!classLineGroups?.some((clg) => clg.class_id === id);
+
+    return isLinked;
   }
 
-  function filterClasses(keyword: string) {
-    return classesDetail.filter((classDetail) => {
-      const isMatch =
-        classDetail.classname.toLowerCase().includes(keyword.toLowerCase()) ||
-        classDetail.coursename.toLowerCase().includes(keyword.toLowerCase()) ||
-        classDetail.course_id.toLowerCase().includes(keyword.toLowerCase());
+  const fetchData = async () => {
+    try {
+      setLoading(true);
 
-      if (selectedFilter === "all") {
-        return isMatch;
-      } else if (selectedFilter === "linked") {
-        return isMatch && classDetail.class_line_group_id !== null;
-      } else if (selectedFilter === "unlinked") {
-        return isMatch && classDetail.class_line_group_id == null;
+      if (session.data?.user.username != null && selectedSemester != null) {
+        const classesResponse = await queryAssistantClasses(
+          session.data?.user.username,
+          selectedSemester.semesterID
+        );
+
+        if (classesResponse.response != "") {
+          const transformedData = transformClassApiReponse(classesResponse);
+          setClasses(transformedData);
+
+          if (transformedData.length > 0) {
+            const classIds = transformedData.map((c: Class) => c.id);
+            const linkedClassesResponse = await queryLinkedAssistantClasses(
+              classIds
+            );
+            setClassLineGroups(linkedClassesResponse);
+          }
+        } else {
+          setClasses([]);
+        }
       }
-    });
-  }
+    } catch (error) {
+      console.error("Error fetching data:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    queryClassDetail();
-  }, [refresh]);
-
-  const filteredClasses = filterClasses(value);
+    fetchData();
+  }, [refresh, selectedSemester]);
 
   return (
     <>
@@ -101,11 +117,28 @@ export default function Classes() {
             </Select>
           </Box>
           <div className="grid-cols-3 grid gap-7 mt-10">
-            {filteredClasses.map((x) => {
-              return (
-                <ClassDetailCard classDetail={x} refreshPage={refreshPage} />
-              );
-            })}
+            {loading ? (
+              Array.from({ length: 6 }).map((_, index) => (
+                <Box key={index} maxW="sm">
+                  <Skeleton height="100px" width="100%" />
+                  <Skeleton height="20px" width="100%" mt="2" />
+                  <Skeleton height="20px" width="100%" mt="2" />
+                </Box>
+              ))
+            ) : classes.length !== 0 && classLineGroups !== null ? (
+              classes.map((x) => {
+                return (
+                  <ClassDetailCard
+                    isLinked={checkClassIdLinked(x.id)}
+                    class={x}
+                    refreshPage={refreshPage}
+                    key={x.id}
+                  />
+                );
+              })
+            ) : (
+              <p>No class data available.</p>
+            )}
           </div>
         </main>
       </Nav>
