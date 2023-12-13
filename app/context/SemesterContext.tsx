@@ -39,6 +39,7 @@ export function SemesterProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true); // Initialize loading state as true
 
   useEffect(() => {
+    console.log("Kontol");
     Promise.all([queryActiveSemester(), queryAllSemesters()])
       .then(([activeSemesterResponse, allSemestersResponse]) => {
         const activeSemester: Semester = {

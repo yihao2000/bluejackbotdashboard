@@ -37,9 +37,9 @@ export default function Classes() {
     ClassLineGroup[] | null
   >(null);
   const [refresh, setRefresh] = useState(false);
-  const [loading, setLoading] = useState(true); // Add a loading state
-  const toast = useToast();
+  const [loading, setLoading] = useState(true);
 
+  const toast = useToast();
   const session = useSession();
   const { selectedSemester } = useSemester();
 
@@ -55,9 +55,11 @@ export default function Classes() {
 
   const fetchData = async () => {
     try {
-      setLoading(true);
+      // console.log(session.data?.user);
+      // console.log(selectedSemester);
 
       if (session.data?.user.username != null && selectedSemester != null) {
+        console.log("Ga null");
         const classesResponse = await queryAssistantClasses(
           session.data?.user.username,
           selectedSemester.semesterID
@@ -79,13 +81,20 @@ export default function Classes() {
         }
       }
     } catch (error) {
-      console.error("Error fetching data:", error);
+      toast({
+        title: "Error",
+        description: "An error occurred while fetching data.",
+        status: "error",
+        duration: 5000,
+        isClosable: true,
+      });
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
+    console.log("Fetching classes");
     fetchData();
   }, [refresh, selectedSemester]);
 

@@ -4,13 +4,6 @@ export interface ClassLineGroup {
   last_linked_at: string;
 }
 
-export interface Course {
-  id: string;
-  code: string;
-  name: string;
-  credit: number;
-}
-
 export interface ClassLinkDetail {
   bot_id: string;
   bot_invite_link: string;
@@ -47,4 +40,11 @@ export interface ClassLineGroup {
   class_id: string;
   class_line_group_id: string;
   last_linked_at: string;
+}
+
+export interface Channel {
+  channel_id: string;
+  channel_name: string;
+  channel_description: string;
+  channel_subscribers: string[];
 }

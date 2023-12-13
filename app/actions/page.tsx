@@ -12,7 +12,7 @@ import {
   Textarea,
   useColorMode,
 } from "@chakra-ui/react";
-import { CardData, Class, ClassDetail, Course } from "../interfaces/interfaces";
+import { CardData, Class, ClassLineGroup } from "../interfaces/interfaces";
 import ClassCard from "../components/cards/classdetailcard";
 import { BsFilter } from "react-icons/bs";
 import React, { useEffect, useState } from "react";
@@ -22,37 +22,132 @@ import {
   LINKED_CLASSES_COURSE_QUERY,
   LINKED_CLASSES_QUERY,
   announceMessage,
+  queryAssistantClasses,
   queryClassesCourses,
+  queryLinkedAssistantClasses,
   queryLinkedClasses,
+  scheduleMessage,
 } from "../utils/constants";
 import ClassDetailCard from "../components/cards/classdetailcard";
 import SelectableCard from "../components/cards/selectablecard";
 import { SelectableButton } from "../components/buttons/selectablebutton";
 import { useToast } from "@chakra-ui/react";
 import { DatePicker } from "@orange_digital/chakra-datepicker";
+import { useSemester } from "../context/SemesterContext";
+import {
+  convertDateFormat,
+  formatTime,
+  transformClassApiReponse,
+  transformClassSubjectFormat,
+} from "../utils/formatter";
+import { useSession } from "next-auth/react";
+import { AnnouncementModal } from "../components/modal/announcementmodal";
+import { AiFillCheckCircle } from "react-icons/ai";
+import { IconContext } from "react-icons";
+import AnimatedButton from "../components/buttons/animatedbutton";
 
 export default function Classes() {
   const [selectedClasses, setselectedClasses] = useState<string[]>([]);
-  const [classesList, setClassesList] = useState<Class[]>([]);
   const [selectedOption, setSelectedOption] = useState("");
   const [message, setMessage] = React.useState("");
-  const [coursesList, setCoursesList] = useState<Course[]>();
-  const [startDate, setStartDate] = useState(new Date());
+  const [subjects, setsubjects] = useState<string[]>();
+  const [scheduleDate, setscheduleDate] = useState(new Date());
+  const { selectedSemester } = useSemester();
 
+  const [classLoading, setclassLoading] = useState(false);
+  const [actionLoading, setActionLoading] = useState(false);
   const toast = useToast();
+  const session = useSession();
 
-  function formatTime(date: Date) {
-    return `${String(date.getHours()).padStart(2, "0")}:${String(
-      date.getMinutes()
-    ).padStart(2, "0")}`;
-  }
+  const [openAnnouncementModal, setOpenAnnouncementModal] = useState(false);
+
+  const [classes, setClasses] = useState<Array<Class>>([]);
+  const [classLineGroups, setClassLineGroups] = useState<
+    ClassLineGroup[] | null
+  >(null);
+
+  const [refresh, setRefresh] = useState(false);
+
+  const getClassessubjects = (classes: Class[]) => {
+    const subjectSet = new Set<string>();
+
+    for (const cls of classes) {
+      subjectSet.add(cls.subject);
+    }
+
+    setsubjects(Array.from(subjectSet));
+  };
+
+  const fetchData = async () => {
+    try {
+      setclassLoading(true);
+
+      if (session.data?.user.username != null && selectedSemester != null) {
+        const classesResponse = await queryAssistantClasses(
+          session.data?.user.username,
+          selectedSemester.semesterID
+        );
+
+        if (classesResponse.response != "") {
+          const transformedData = transformClassApiReponse(classesResponse);
+
+          if (transformedData.length > 0) {
+            const classIds = transformedData.map((c: Class) => c.id);
+            const linkedClassesResponse = await queryLinkedAssistantClasses(
+              classIds
+            );
+            setClassLineGroups(linkedClassesResponse);
+
+            const filteredClasses = transformedData.filter((c: Class) =>
+              linkedClassesResponse.some(
+                (clg: ClassLineGroup) => clg.class_id === c.id
+              )
+            );
+            getClassessubjects(filteredClasses);
+            setClasses(filteredClasses);
+          }
+        } else {
+          setClasses([]);
+        }
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "An error occurred while fetching data.",
+        status: "error",
+        duration: 5000,
+        isClosable: true,
+      });
+    } finally {
+      setclassLoading(false);
+    }
+  };
+
+  const clearSelectedClassesData = () => {
+    setselectedClasses([]);
+  };
+
+  const clearsubjects = () => {
+    setsubjects([]);
+  };
+
+  const clearMessages = () => {
+    setMessage("");
+  };
+
+  useEffect(() => {
+    fetchData();
+    clearSelectedClassesData();
+    clearsubjects();
+    clearMessages();
+  }, [refresh, selectedSemester]);
 
   function handleTimeChange(newTime: string) {
     const [hours, minutes] = newTime.split(":").map(Number);
-    const newDate = new Date(startDate);
+    const newDate = new Date(scheduleDate);
     newDate.setHours(hours);
     newDate.setMinutes(minutes);
-    setStartDate(newDate);
+    setscheduleDate(newDate);
   }
 
   function clearSelectedClasses() {
@@ -64,27 +159,101 @@ export default function Classes() {
   };
 
   const handleCardClick = (card: Class) => {
-    if (selectedClasses.includes(card.classid)) {
-      setselectedClasses(selectedClasses.filter((id) => id !== card.classid));
+    if (selectedClasses.includes(card.id)) {
+      setselectedClasses(selectedClasses.filter((id) => id !== card.id));
     } else {
-      setselectedClasses([...selectedClasses, card.classid]);
+      setselectedClasses([...selectedClasses, card.id]);
     }
+  };
+
+  const showAnnouncementModal = () => {
+    setOpenAnnouncementModal(true);
+  };
+
+  const refreshPage = () => {
+    setRefresh(!refresh);
+  };
+
+  const hideAnnouncementModal = () => {
+    setOpenAnnouncementModal(false);
+    refreshPage();
+  };
+
+  const handleAnnounceMessage = () => {
+    //Set Action Loading Animation
+    setActionLoading(true);
+    announceMessage(selectedClasses, message)
+      .then((x) => {
+        console.log(x);
+        if (x.statusCode === 500) {
+          toast({
+            title: "API Error",
+            description: x.message,
+            status: "error",
+            duration: 5000,
+            isClosable: true,
+          });
+        } else if (x.statusCode === 200) {
+          //Alert Munculin
+          showAnnouncementModal();
+        }
+        console.log(x);
+      })
+      .catch((error) => {
+        console.error("API Error:", error);
+        toast({
+          title: "Error",
+          description: error.message,
+          status: "error",
+          duration: 5000,
+          isClosable: true,
+        });
+      })
+      .finally(() => {
+        setActionLoading(false);
+      });
+  };
+
+  const handleScheduleMessage = () => {
+    setActionLoading(true);
+    console.log(convertDateFormat(scheduleDate));
+    //Set Action Loading Animation
+    scheduleMessage(selectedClasses, message, convertDateFormat(scheduleDate))
+      .then((x) => {
+        if (x.statusCode === 500) {
+          toast({
+            title: "API Error",
+            description: x.message,
+            status: "error",
+            duration: 5000,
+            isClosable: true,
+          });
+        } else if (x.statusCode === 200) {
+          //Alert Munculin
+          showAnnouncementModal();
+        }
+        console.log(x);
+      })
+      .catch((error) => {
+        console.error("API Error:", error);
+        toast({
+          title: "Error",
+          description: error.message,
+          status: "error",
+          duration: 5000,
+          isClosable: true,
+        });
+      })
+      .finally(() => {
+        setActionLoading(false);
+      });
   };
 
   const handleAnnounceClick = async () => {
     if (selectedOption == "announcemessage") {
-      try {
-        await announceMessage(selectedClasses, message);
-      } catch (error) {
-        console.error("API Error:", error);
-        toast({
-          title: "Error",
-          description: "An error occurred while processing your request.",
-          status: "error",
-          duration: 5000, // Duration in milliseconds
-          isClosable: true, // Allow the user to close the toast
-        });
-      }
+      handleAnnounceMessage();
+    } else if (selectedOption == "schedulemessage") {
+      handleScheduleMessage();
     }
   };
 
@@ -94,7 +263,7 @@ export default function Classes() {
   };
 
   const handleSelectAllClick = () => {
-    const allClassIds = classesList.map((c) => c.classid);
+    const allClassIds = classes.map((c) => c.id);
 
     if (
       selectedClasses.length === allClassIds.length &&
@@ -106,69 +275,32 @@ export default function Classes() {
     }
   };
 
-  const handleSelectSpecificClick = (courseid: string) => {
-    const allClassIdsInCourseSelected = classesList
-      .filter((cls) => cls.courseid === courseid)
-      .every((cls) => selectedClasses.includes(cls.classid));
+  const handleSelectSpecificClick = (subject: string) => {
+    // Filter the classes to include only those with subject === subject
+    const classesInsubject = classes.filter((cls) => cls.subject === subject);
 
-    if (allClassIdsInCourseSelected) {
+    // Check if all the classes in this subject are already selected
+    const allClassesSelected = classesInsubject.every((cls) =>
+      selectedClasses.includes(cls.id)
+    );
+
+    if (allClassesSelected) {
+      // If all classes are selected, remove them
       const newSelectedClasses = selectedClasses.filter(
-        (classId) =>
-          !classesList
-            .filter((cls) => cls.courseid === courseid)
-            .map((cls) => cls.classid)
-            .includes(classId)
+        (classId) => !classesInsubject.map((cls) => cls.id).includes(classId)
       );
       setselectedClasses(newSelectedClasses);
     } else {
-      const classIdsInCourse = classesList
-        .filter((cls) => cls.courseid === courseid)
-        .map((cls) => cls.classid);
-      setselectedClasses([...selectedClasses, ...classIdsInCourse]);
+      // If not all classes are selected, add them
+      const classIdsInsubject = classesInsubject.map((cls) => cls.id);
+      setselectedClasses([...selectedClasses, ...classIdsInsubject]);
     }
   };
-
-  function queryAllData() {
-    queryLinkedClasses()
-      .then((result) => {
-        console.log(result);
-        setClassesList(result); // Update the state with the fetched data
-      })
-      .catch((error) => {
-        console.error("Error fetching linked classes:", error);
-        toast({
-          title: "Error",
-          description: "An error occurred while fetching linked classes.",
-          status: "error",
-          duration: 5000,
-          isClosable: true,
-        });
-      });
-
-    queryClassesCourses()
-      .then((result) => {
-        setCoursesList(result);
-      })
-      .catch((error) => {
-        console.error("Error fetching classes courses:", error);
-        toast({
-          title: "Error",
-          description: "An error occurred while fetching classes courses.",
-          status: "error",
-          duration: 5000,
-          isClosable: true,
-        });
-      });
-  }
-
-  useEffect(() => {
-    queryAllData();
-  }, []);
 
   return (
     <>
       <Nav>
-        <main className="max-w-full">
+        <main className="max-w-full pb-2">
           <Box>
             <Text fontSize="2xl" fontWeight="bold">
               Actions
@@ -192,87 +324,94 @@ export default function Classes() {
                 <Text>
                   Pick classes that you want to perform selected action
                 </Text>
-                {classesList && (
-                  <Box display="flex" gap="2" flexWrap="wrap">
-                    <SelectableButton
-                      label="All"
-                      selectedClasses={selectedClasses}
-                      classesList={classesList}
-                      handleButtonClick={handleSelectAllClick}
-                      colorScheme={
-                        selectedClasses.length === classesList.length &&
-                        classesList.every((cls) =>
-                          selectedClasses.includes(cls.classid)
-                        )
-                          ? "twitter"
-                          : "gray"
-                      } // Pass the color scheme based on your condition
-                    />
-                    {coursesList &&
-                      coursesList.map((course) => (
+                {!classLoading ? (
+                  <>
+                    {subjects && (
+                      <Box display="flex" gap="2" flexWrap="wrap">
                         <SelectableButton
-                          key={course.id}
-                          label={`${course.code} - ${course.name}`}
+                          label="All"
                           selectedClasses={selectedClasses}
-                          classesList={classesList}
-                          handleButtonClick={() =>
-                            handleSelectSpecificClick(course.id)
-                          }
+                          classesList={classes}
+                          handleButtonClick={handleSelectAllClick}
                           colorScheme={
-                            classesList
-                              .filter((cls) => cls.courseid === course.id)
-                              .every((cls) =>
-                                selectedClasses.includes(cls.classid)
-                              )
+                            selectedClasses.length === classes.length &&
+                            classes.every((cls) =>
+                              selectedClasses.includes(cls.id)
+                            )
                               ? "twitter"
                               : "gray"
-                          } // Pass the color scheme based on your condition
+                          }
                         />
-                      ))}
-                  </Box>
+                        {subjects &&
+                          subjects.map((subject) => (
+                            <SelectableButton
+                              key={subject}
+                              label={transformClassSubjectFormat(subject)}
+                              selectedClasses={selectedClasses}
+                              classesList={classes}
+                              handleButtonClick={() =>
+                                handleSelectSpecificClick(subject)
+                              }
+                              colorScheme={
+                                classes
+                                  .filter((cls) => cls.subject === subject)
+                                  .every((cls) =>
+                                    selectedClasses.includes(cls.id)
+                                  )
+                                  ? "twitter"
+                                  : "gray"
+                              } // Pass the color scheme based on your condition
+                            />
+                          ))}
+                      </Box>
+                    )}
+
+                    <Box
+                      display={{ base: "block", md: "flex" }}
+                      flexWrap="wrap"
+                      gap="5"
+                    >
+                      {classes &&
+                        classes.map((x) => (
+                          <SelectableCard
+                            key={x.id}
+                            currentClass={x}
+                            onClick={() => handleCardClick(x)}
+                            isSelected={selectedClasses.includes(x.id)}
+                          />
+                        ))}
+                    </Box>
+                  </>
+                ) : (
+                  "Loading"
                 )}
-                <Box
-                  display={{ base: "block", md: "flex" }}
-                  flexWrap="wrap"
-                  gap="5"
-                >
-                  {classesList &&
-                    classesList.map((x) => (
-                      <SelectableCard
-                        key={x.classid}
-                        title={x.classname}
-                        content={"GO22-2"}
-                        onClick={() => handleCardClick(x)}
-                        isSelected={selectedClasses.includes(x.classid)}
-                      />
-                    ))}
-                </Box>
               </>
             )}
 
-            {selectedOption == "schedulemessage" && (
-              <>
-                <Text>Please select the scheduled message date</Text>
-                <Box width="sm" display="flex" gap="2">
-                  <DatePicker
-                    initialValue={startDate}
-                    onDateChange={(x) => {
-                      if (x !== null) {
-                        setStartDate(x);
-                      }
-                    }}
-                  ></DatePicker>
-                  <Input
-                    type="time"
-                    size="lg"
-                    value={formatTime(startDate)}
-                    onChange={(e) => {
-                      handleTimeChange(e.target.value);
-                    }}
-                  />
-                </Box>
-              </>
-            )}
+            {selectedOption == "schedulemessage" &&
+              selectedClasses.length != 0 && (
+                <>
+                  <Text>Please select the scheduled message date</Text>
+                  <Box width="sm" display="flex" gap="2">
+                    <DatePicker
+                      initialValue={scheduleDate}
+                      onDateChange={(x) => {
+                        if (x !== null) {
+                          setscheduleDate(x);
+                        }
+                      }}
+                    ></DatePicker>
+                    <Input
+                      type="time"
+                      size="lg"
+                      value={formatTime(scheduleDate)}
+                      onChange={(e) => {
+                        handleTimeChange(e.target.value);
+                      }}
+                    />
+                  </Box>
+                </>
+              )}
 
             {selectedClasses.length != 0 && (
               <>
@@ -288,13 +427,34 @@ export default function Classes() {
 
                 {message.length > 4 && (
                   <>
-                    <Button onClick={handleAnnounceClick}>Announce</Button>
+                    <AnimatedButton
+                      isLoading={actionLoading}
+                      onClick={handleAnnounceClick}
+                    />
                   </>
                 )}
                 {}
               </>
             )}
           </Box>
+          {openAnnouncementModal && (
+            <>
+              <AnnouncementModal
+                title="SUCCESS !"
+                description="Message have been successfully sent."
+                isOpen={openAnnouncementModal}
+                onOpen={() => showAnnouncementModal()}
+                onClose={() => hideAnnouncementModal()}
+                icon={
+                  <IconContext.Provider
+                    value={{ color: "#40bc7c", size: "100" }}
+                  >
+                    <AiFillCheckCircle />
+                  </IconContext.Provider>
+                }
+              />
+            </>
+          )}
         </main>
       </Nav>
     </>

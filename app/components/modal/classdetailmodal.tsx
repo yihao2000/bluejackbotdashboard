@@ -14,7 +14,7 @@ import {
   Text,
   Divider,
   Tooltip,
-  useToast, // Import Flex component
+  useToast,
 } from "@chakra-ui/react";
 import { IoMdArrowBack } from "react-icons/io";
 import {
@@ -48,12 +48,10 @@ const ClassDetailModal: React.FC<ClassDetailModalProps> = ({
   refreshPage,
   selectedClass,
 }) => {
-  useEffect(() => {
-    console.log(selectedClass.id);
-  }, []);
   const { Canvas } = useQRCode();
 
   const [classLineGroup, setClassLineGroup] = useState<ClassLineGroup[]>([]);
+  const [loading, setLoading] = useState(false);
 
   const toast = useToast();
 
@@ -74,40 +72,8 @@ const ClassDetailModal: React.FC<ClassDetailModalProps> = ({
     },
   });
 
-  const [unlinkFormData, setUnlinkFormData] = useState({
-    cmd: "unlinkgroup",
-    classId: selectedClass.id,
-  });
-
-  const handleUnlink = () => {
-    fetch("https://bluejackbot.jex.ink/server/manualrequest", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(unlinkFormData),
-    })
-      .then((response) => {
-        if (response.ok) {
-          return response.json();
-        } else {
-          throw new Error("API request failed");
-        }
-      })
-      .then((data) => {
-        // Handle the API response data here
-        refreshPage();
-      })
-      .catch((error) => {
-        console.log("Then error");
-        // refreshPage();
-        // Handle any errors that occurred during the API request
-        console.error("API Error:", error);
-      });
-  };
-
   const showResult = (res: any) => {
-    if (res.message != "Linking Successful") {
+    if (res.message != "Linking successful") {
       toast({
         title: "Error",
         description: res.message,
@@ -122,12 +88,16 @@ const ClassDetailModal: React.FC<ClassDetailModalProps> = ({
 
   const handleLink = () => {
     if (linkFormData.params.linkCode.length == 4) {
+      setLoading(true);
       const { classID, linkCode } = linkFormData.params;
-      linkClass(classID, linkCode).then((res) => {
-        showResult(res);
-        // console.log("Handling Link");
-        // refreshPage();
-      });
+      linkClass(classID, linkCode)
+        .then((res) => {
+          console.log(res);
+          showResult(res);
+        })
+        .finally(() => {
+          setLoading(false);
+        });
     }
   };
 
@@ -159,16 +129,20 @@ const ClassDetailModal: React.FC<ClassDetailModalProps> = ({
           Invite the bot to your group and enter the given verification code
         </Box>
         <Box display="flex" justifyContent="center" mt="4">
-          <CustomInput
-            onSubmit={(value: string) => {
-              setLinkFormData((prevData) => ({
-                params: {
-                  ...prevData.params, // Preserve other params
-                  linkCode: value,
-                },
-              }));
-            }}
-          />
+          {!loading ? (
+            <CustomInput
+              onSubmit={(value: string) => {
+                setLinkFormData((prevData) => ({
+                  params: {
+                    ...prevData.params, // Preserve other params
+                    linkCode: value,
+                  },
+                }));
+              }}
+            />
+          ) : (
+            "Loading"
+          )}
         </Box>
       </>
     );
@@ -244,7 +218,7 @@ const ClassDetailModal: React.FC<ClassDetailModalProps> = ({
               <>
                 <Text fontSize="sm">How to unlink</Text>
                 <Tooltip
-                  label="To unlink, simply remove the bot from the line group"
+                  label="To unlink, simply remove the bot from the line group !"
                   fontSize="md"
                   shouldWrapChildren
                 >

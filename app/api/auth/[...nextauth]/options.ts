@@ -41,13 +41,15 @@ export const options: NextAuthOptions = {
                     }
 
                     const data = await response.json();
-                    if (data.response.LogOnMobileResponse.LogOnMobileResult) {
+                 
+                    if (data.response != "") {
                         const user = {
-                            id: data.response.LogOnMobileResponse.LogOnMobileResult["a:UserId"],
-                            name: data.response.LogOnMobileResponse.LogOnMobileResult["a:Name"],
-                            role: data.response.LogOnMobileResponse.LogOnMobileResult["a:Roles"]["b:string"],
-                            username: data.response.LogOnMobileResponse.LogOnMobileResult["a:UserName"],
+                            id: data.response["a:UserId"],
+                            name: data.response["a:Name"],
+                            role: data.response["a:Role"],
+                            username: data.response["a:UserName"],
                         };
+                        
                         return user;
                     } else {
                         throw new Error("Invalid Username / Password");

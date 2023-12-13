@@ -29,6 +29,10 @@ const theme = extendTheme({
       100: '#1798d4',
       200: "#1e7898",
     },
+
+    success:{
+      25: "#40bc7c",
+    },
     
 
 

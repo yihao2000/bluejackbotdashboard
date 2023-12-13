@@ -20,6 +20,7 @@ import {
   useToast,
 } from "@chakra-ui/react";
 import {
+  Channel,
   Class,
   ClassLineGroup,
   ClassLinkDetail,
@@ -33,14 +34,15 @@ import ClassDetailModal from "../modal/classdetailmodal";
 import { useEffect, useState } from "react";
 import { CLASS_BOT_QUERY, getClassBot } from "@/app/utils/constants";
 import { transformClassSubjectFormat } from "@/app/utils/formatter";
+import { MdOutlineDescription } from "react-icons/md";
+import { MdOutlineSensorDoor } from "react-icons/md";
 
 interface Data {
-  class: Class;
-  isLinked: boolean;
+  channel: Channel;
   refreshPage: () => void;
 }
 
-export default function ClassDetailCard(props: Data) {
+export default function ChannelDetailCard(props: Data) {
   const classDetailModalDisclosure = useDisclosure();
   const [classBotResult, setClassBotResult] = useState<ClassLinkDetail | null>(
     null
@@ -88,37 +90,32 @@ export default function ClassDetailCard(props: Data) {
   return (
     <Card className="hover:cursor-pointer hover:scale-105 transition">
       <CardHeader>
-        <Heading size="md">
-          {transformClassSubjectFormat(props.class.subject)}
-        </Heading>
+        <Heading size="md">{props.channel.channel_name}</Heading>
       </CardHeader>
       <CardBody py={0}>
-        <Box display="flex" className="items-center gap-2">
-          <PiClipboardTextLight />
-          <Text fontSize="sm">{props.class.class}</Text>
-        </Box>
-        <Box display="flex" className="items-center gap-2">
-          <RiGroupLine />
-          <Text fontSize="sm">{props.class.assistant}</Text>
+        <Box display="flex" className="items-start gap-2">
+          <Box className="mt-1">
+            <MdOutlineDescription />
+          </Box>
+          <Text
+            fontSize="sm"
+            flexWrap="wrap"
+            overflow="hidden"
+            whiteSpace="break-spaces"
+            textOverflow="ellipsis"
+          >
+            {props.channel.channel_description}
+          </Text>
         </Box>
         <Box display="flex" className="items-center gap-2">
           <MdOutlineMeetingRoom />
-          <Text fontSize="sm">{props.class.room}</Text>
-        </Box>
-
-        <Box display="flex" className="items-center gap-2">
-          <Image src="/linelogo.svg" />
-          <Text
-            fontWeight="bold"
-            fontSize="sm"
-            color={props.isLinked ? "green" : "gray.500"}
-          >
-            {props.isLinked ? "Linked" : "Not Linked"}
-          </Text>
+          {
+            
+          }
         </Box>
       </CardBody>
       <CardFooter>
-        <Button
+        {/* <Button
           onClick={() => {
             handleClassButtonClick(props.class.id);
           }}
@@ -131,31 +128,17 @@ export default function ClassDetailCard(props: Data) {
           ) : (
             "Link"
           )}
-        </Button>
-
-        {/* {props.isLinked ? (
-          <Button
-            onClick={classDetailModalDisclosure.onOpen}
-            colorScheme={
-              props.classDetail.class_line_group_id == null ? "green" : "blue"
-            }
-          >
-            Hai
-            {props.classDetail.class_line_group_id == null ? "Link" : "Details"}
-          </Button>
-          ) : ( }
-          {/* <Button onClick={groupCodeModalDisclosure.onOpen}>Link</Button> */}
-        {/* )} */}
+        </Button> */}
       </CardFooter>
 
-      {classBotResult && (
+      {/* {classBotResult && (
         <ClassDetailModal
           selectedClass={props.class}
           {...classDetailModalDisclosure}
           classLinkDetail={classBotResult}
           refreshPage={props.refreshPage}
         />
-      )}
+      )} */}
     </Card>
   );
 }

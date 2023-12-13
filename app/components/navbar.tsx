@@ -32,6 +32,7 @@ import {
   FiMenu,
   FiChevronDown,
 } from "react-icons/fi";
+import { GoBroadcast } from "react-icons/go";
 
 import { AiOutlineMessage, AiOutlineSetting } from "react-icons/ai";
 import { IconType } from "react-icons";
@@ -71,6 +72,7 @@ const LinkItems: Array<LinkItemProps> = [
   { name: "Classes", icon: FiTrendingUp, href: "/classes" }, // Example href
   { name: "Services", icon: FiCompass, href: "/services" }, // Example href
   { name: "Messages", icon: AiOutlineMessage, href: "/messages" }, // Example href
+  { name: "Channels", icon: GoBroadcast, href: "/channels" },
   { name: "Actions", icon: AiOutlineSetting, href: "/actions" },
 ];
 
@@ -145,6 +147,15 @@ const NavItem = ({ icon, children, href, ...rest }: NavItemProps) => {
 
 const MobileNav = ({ onOpen, ...rest }: MobileProps) => {
   const { semesters, selectedSemester, setSelectedSemester } = useSemester();
+  const [isLoading, setIsLoading] = useState(false);
+
+  const setLoading = () => {
+    setIsLoading(true);
+  };
+
+  const unsetLoading = () => {
+    setIsLoading(false);
+  };
 
   const handleSemesterChange = (
     event: React.ChangeEvent<HTMLSelectElement>

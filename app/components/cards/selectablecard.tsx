@@ -1,18 +1,23 @@
 import React from "react";
 import { Box, Text, useColorModeValue } from "@chakra-ui/react";
+import { Class } from "@/app/interfaces/interfaces";
+import { transformClassSubjectFormat } from "@/app/utils/formatter";
+import { PiClipboardTextLight } from "react-icons/pi";
+import { RiGroupLine } from "react-icons/ri";
+import { MdOutlineMeetingRoom } from "react-icons/md";
 
 type CardProps = {
-  title: string;
-  content: string;
+  currentClass: Class;
   onClick: () => void;
   isSelected: boolean;
 };
 
-function SelectableCard({ title, content, onClick, isSelected }: CardProps) {
+function SelectableCard({ currentClass, onClick, isSelected }: CardProps) {
   return (
     <Box
-      minWidth="xs"
-      p={3}
+      minWidth="md"
+      p={5}
+      maxWidth="md"
       shadow="md"
       borderWidth="1px"
       borderRadius="md"
@@ -21,10 +26,23 @@ function SelectableCard({ title, content, onClick, isSelected }: CardProps) {
       cursor="pointer"
       onClick={() => onClick()}
     >
-      <Text fontSize="lg" fontWeight="bold">
-        {title}
-      </Text>
-      <Text mt={2}>{content}</Text>
+      <Box mb="2">
+        <Text fontSize="lg" fontWeight="bold">
+          {transformClassSubjectFormat(currentClass.subject)}
+        </Text>
+      </Box>
+      <Box display="flex" className="items-center gap-2">
+        <PiClipboardTextLight />
+        <Text fontSize="sm">{currentClass.class}</Text>
+      </Box>
+      <Box display="flex" className="items-center gap-2">
+        <RiGroupLine />
+        <Text fontSize="sm">{currentClass.assistant}</Text>
+      </Box>
+      <Box display="flex" className="items-center gap-2">
+        <MdOutlineMeetingRoom />
+        <Text fontSize="sm">{currentClass.room}</Text>
+      </Box>
     </Box>
   );
 }
