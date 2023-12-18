@@ -20,7 +20,7 @@ export const options: NextAuthOptions = {
             async authorize(credentials, req){
                 const username = credentials?.username;
                 const password = credentials?.password;
-
+                // console.log(username, password);
                 try {
                     const response = await fetch(USER_LOGIN_QUERY, {
                         method: "POST",
@@ -32,6 +32,7 @@ export const options: NextAuthOptions = {
 
                     if (!response.ok) {
                         // Check for an authentication error (e.g., invalid credentials)
+                        console.log(response)
                         if (response.status === 401) {
                             throw new Error("Invalid Username / Password");
                         }

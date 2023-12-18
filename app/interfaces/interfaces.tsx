@@ -48,3 +48,11 @@ export interface Channel {
   channel_description: string;
   channel_subscribers: string[];
 }
+
+export interface MessageTemplate{
+  id: string,
+  name: string,
+  content: string,
+  data_map: Map<string, any>,
+  category: string,
+}
