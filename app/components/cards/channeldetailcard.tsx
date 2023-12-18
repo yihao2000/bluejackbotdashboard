@@ -15,6 +15,7 @@ import {
   ModalFooter,
   ModalHeader,
   ModalOverlay,
+  Skeleton,
   Text,
   useDisclosure,
   useToast,
@@ -24,6 +25,7 @@ import {
   Class,
   ClassLineGroup,
   ClassLinkDetail,
+  RoomClass,
 } from "../../interfaces/interfaces";
 import { PiClipboardTextLight } from "react-icons/pi";
 import { RiGroupLine } from "react-icons/ri";
@@ -32,10 +34,18 @@ import { GrStatusGood } from "react-icons/gr";
 import LINELogo from "../customlogo";
 import ClassDetailModal from "../modal/classdetailmodal";
 import { useEffect, useState } from "react";
-import { CLASS_BOT_QUERY, getClassBot } from "@/app/utils/constants";
-import { transformClassSubjectFormat } from "@/app/utils/formatter";
+import {
+  CLASS_BOT_QUERY,
+  getClassBot,
+  queryStudentClass,
+} from "@/app/utils/constants";
+import {
+  transformClassSubjectFormat,
+  transformStudentClassResponse,
+} from "@/app/utils/formatter";
 import { MdOutlineDescription } from "react-icons/md";
 import { MdOutlineSensorDoor } from "react-icons/md";
+import ChannelDetailModal from "../modal/channeldetailmodal";
 
 interface Data {
   channel: Channel;
@@ -43,48 +53,64 @@ interface Data {
 }
 
 export default function ChannelDetailCard(props: Data) {
-  const classDetailModalDisclosure = useDisclosure();
-  const [classBotResult, setClassBotResult] = useState<ClassLinkDetail | null>(
-    null
-  );
+  const [studentClassList, setStudentClassList] = useState<RoomClass[]>([]);
+  const channelDetailModalDisclosure = useDisclosure();
+
   const [isLoading, setIsLoading] = useState(false);
   const toast = useToast();
+
+  useEffect(() => {
+    getStudentClass();
+  }, []);
 
   function setLoading() {
     setIsLoading(true);
   }
+
+  function refreshPage() {}
 
   function unsetLoading() {
     setIsLoading(false);
   }
 
   function openDetailModal() {
-    classDetailModalDisclosure.onOpen();
+    channelDetailModalDisclosure.onOpen();
   }
 
-  const getSpecifiedClassBot = (classID: string) => {
-    getClassBot(classID)
-      .then((res) => {
-        console.log(res);
-        setClassBotResult(res);
-      })
-      .catch(() => {
-        toast({
-          title: "Error",
-          description: "Failed to fetch bot for the selected class",
-          status: "error",
-          duration: 5000,
-          isClosable: true,
-        });
-      })
-      .finally(() => {
+  useEffect(() => {
+    console.log(studentClassList);
+  }, [studentClassList]);
+
+  const getStudentClass = async () => {
+    setLoading();
+    try {
+      const results = await Promise.all(
+        props.channel.channel_subscribers.map(async (x) => {
+          if (x) {
+            const res = await queryStudentClass(x);
+
+            // Add id property to each Class object
+            res.response.id = x;
+
+            console.log(res);
+            return res;
+          }
+          return null;
+        })
+      ).finally(() => {
         unsetLoading();
       });
+
+      // Now 'results' is an array containing the results of all the promises
+      setStudentClassList(transformStudentClassResponse(results));
+    } catch (error) {
+      // Handle errors if needed
+      console.error("Error fetching student class:", error);
+    }
   };
 
-  const handleClassButtonClick = (classID: string) => {
+  const handleDetailButtonClick = () => {
     openDetailModal();
-    getSpecifiedClassBot(classID);
   };
 
   return (
@@ -107,34 +133,46 @@ export default function ChannelDetailCard(props: Data) {
             {props.channel.channel_description}
           </Text>
         </Box>
-        <Box display="flex" className="items-center gap-2">
+        <Box display="flex" className="items-center gap-2" flexWrap="wrap">
           <MdOutlineMeetingRoom />
-          {
-            
-          }
+          {isLoading ? (
+            <Skeleton width="20" height="20px" />
+          ) : (
+            studentClassList &&
+            studentClassList.map((x) => (
+              <Text fontSize="sm" m="0" p="0">
+                {x.class}
+              </Text>
+            ))
+          )}
+          {/* <Text>asdasd</Text>
+          <Text>asdasd</Text>
+          <Text>asdasd</Text>
+          <Text>asdasd</Text>
+          <Text>asdasd</Text> */}
         </Box>
       </CardBody>
       <CardFooter>
-        {/* <Button
+        <Button
+          colorScheme={"blue"}
           onClick={() => {
-            handleClassButtonClick(props.class.id);
+            handleDetailButtonClick();
           }}
-          colorScheme={props.isLinked ? "blue" : "green"}
         >
-          {isLoading ? (
-            <CircularProgress isIndeterminate color="blue.200" size="1.3em" />
-          ) : props.isLinked ? (
-            "Details"
-          ) : (
-            "Link"
-          )}
-        </Button> */}
+          Details
+        </Button>
       </CardFooter>
 
+      <ChannelDetailModal
+        channel={props.channel}
+        {...channelDetailModalDisclosure}
+        roomClasses={studentClassList}
+        refreshPage={refreshPage}
+      />
       {/* {classBotResult && (
         <ClassDetailModal
           selectedClass={props.class}
-          {...classDetailModalDisclosure}
+          {...channelDetailModalDisclosure}
           classLinkDetail={classBotResult}
           refreshPage={props.refreshPage}
         />

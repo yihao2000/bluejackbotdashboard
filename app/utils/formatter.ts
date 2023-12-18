@@ -89,3 +89,11 @@ export function transformSemesterApiResponse(responseArray: any) {
     return transformedData;
   }
   
+  export function transformStudentClassResponse(responseArray: any){
+    console.log(responseArray)
+    return responseArray.map((x: any) => ({
+      class: x["response"]["a:Class"],
+      subject: x["response"]["a:Subject"],
+      id: x["response"]["id"]
+    }));
+  }

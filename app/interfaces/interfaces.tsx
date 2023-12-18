@@ -49,6 +49,12 @@ export interface Channel {
   channel_subscribers: string[];
 }
 
+export interface RoomClass {
+  id: String;
+  class: String;
+  subject: String;
+}
+
 export interface MessageTemplate{
   id: string,
   name: string,
