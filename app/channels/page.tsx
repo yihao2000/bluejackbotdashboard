@@ -23,7 +23,9 @@ export default function Channels() {
   const [refresh, setRefresh] = useState(false);
 
   useEffect(() => {
+    console.log("REfreshing");
     queryChannels().then((res) => {
+      console.log(res);
       setChannels(transformChannelData(res));
     });
   }, [refresh]);

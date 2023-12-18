@@ -16,6 +16,7 @@ export const SCHEDULE_MESSAGE = `${API_URL}/classes/scheduleclassesmessage`
 export const CHANNELS_QUERY = `${API_URL}/channels/getchannels`
 export const CREATE_CHANNEL = `${API_URL}/channels/createchannel`
 export const GET_CLASS_QUERY = `${API_URL}/classes/getstudentclass`
+export const REMOVE_CHANNEL_CLASS = `${API_URL}/channels/removechannelsubscribers`
 
 export const queryLinkedClasses = async () => {
     return fetch(LINKED_CLASSES_QUERY)
@@ -283,4 +284,19 @@ export const checkClassLinked = async (classID: string) => {
       throw new Error("Error fetching data");
     } 
     return await response.json();
+}
+
+export const removeStudentClass = async(channelID: String, classID: String) => {
+  const response = await fetch(REMOVE_CHANNEL_CLASS, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ channelID, classID }),
+  });
+
+  if (!response.ok) {
+    throw new Error("Error fetching data");
+  } 
+  return await response.json();
 }

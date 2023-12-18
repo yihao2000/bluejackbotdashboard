@@ -48,3 +48,9 @@ export interface Channel {
   channel_description: string;
   channel_subscribers: string[];
 }
+
+export interface RoomClass {
+  id: String;
+  class: String;
+  subject: String;
+}
