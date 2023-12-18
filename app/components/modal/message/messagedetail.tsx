@@ -1,11 +1,76 @@
-import React from 'react'
+import { MessageTemplate } from "@/app/interfaces/interfaces";
+import { Box, Button, Divider, Flex, Text } from "@chakra-ui/react";
+import React from "react";
+import ModalTemplate from "../ModalTemplate";
 
-type Props = {}
+type Props = {
+  data: MessageTemplate | undefined;
+  show: boolean;
+  onClose: () => void;
+  toDelete: boolean;
+};
 
 const MessageDetail = (props: Props) => {
-  return (
-    <div>MessageDetail</div>
-  )
-}
+  const header = (
+    <Flex alignItems="center" gap={2}>
+      <span>Template Detail</span>
+    </Flex>
+  );
 
-export default MessageDetail
+  const body = (
+    <Box className="flex gap-2 flex-col p-2">
+      {props.data ? (
+        <>
+          <Box display={"flex"}>
+            <Box fontWeight={"semibold"}>Name :</Box>&nbsp;
+            <Text fontWeight={"bold"} color={"blue.400"}>
+              {props.data.name}
+            </Text>
+          </Box>
+
+          <Box display={"flex"} flexDirection={"column"}>
+            <Box fontWeight={"semibold"}>Content</Box>
+            <Box maxHeight={"20rem"} overflowY={"auto"} className="py-2 px-1">
+              {props.data.content} 
+            </Box>
+          </Box>
+
+          <Box display={"flex"}>
+            <Box fontWeight={"semibold"}>Category :</Box>&nbsp;
+            <Text color={"green.400"} fontWeight={"bold"}>
+              {props.data.category}
+            </Text>
+          </Box>
+        </>
+      ) : (
+        <Text>
+          <b>Data not Found</b>
+        </Text>
+      )}
+      <Divider p="2" />
+    </Box>
+  );
+
+  const footer =
+    props.toDelete && props.data ? (
+      <Box flex="1" textAlign="right">
+        <Text mb="2">
+          Are you sure you want to remove <b>{props.data.name} </b>?
+        </Text>
+        <Button colorScheme="red">Confirm</Button>
+        <Button ml="2">Cancel</Button>
+      </Box>
+    ) : null;
+
+  return (
+    <ModalTemplate
+      isOpen={props.show}
+      onClose={props.onClose}
+      header={header}
+      body={body}
+      footer={footer}
+    />
+  );
+};
+
+export default MessageDetail;

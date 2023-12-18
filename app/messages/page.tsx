@@ -3,6 +3,7 @@ import React, { ChangeEvent, ReactNode, SyntheticEvent, useState } from "react";
 import Nav from "@/app/components/navbar";
 import {
   Box,
+  Button,
   Input,
   InputGroup,
   InputRightElement,
@@ -13,6 +14,8 @@ import { AiOutlineSearch } from "react-icons/ai";
 import { BsFilter } from "react-icons/bs";
 import { MessageTemplate } from "../interfaces/interfaces";
 import MessageTemplateCard from "../components/cards/messagetemplatecard";
+import MessageDetail from "../components/modal/message/messagedetail";
+import AddMessage from "../components/modal/message/addmessage";
 type Props = {};
 
 const data: Array<MessageTemplate> = [
@@ -33,19 +36,20 @@ const data: Array<MessageTemplate> = [
 ];
 
 type ModalState = {
-  title: string,
-  content: ReactNode,
-  show: boolean,
-}
+  type: string;
+  data: MessageTemplate | undefined;
+  show: boolean;
+};
 
 const Page = (props: Props) => {
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState("");
   const [loading, setLoading] = useState(false);
   const [templates, setTemplates] = useState<Array<MessageTemplate>>(data);
+
   const [modal, setModal] = useState<ModalState>({
-    title: "",
-    content: undefined,
+    type: "detail",
+    data: undefined,
     show: false,
   });
 
@@ -55,8 +59,30 @@ const Page = (props: Props) => {
   };
 
   const openDetail = (id: string) => {
-    
+    const data = templates.find((x) => x.id === id);
+    setModal({
+      type: "detail",
+      data: data,
+      show: true,
+    });
+  };
+
+  const openAdd = () => {
+    console.log("open")
+    setModal({
+      type: "add",
+      data: undefined,
+      show: true,
+    })
   }
+
+  const closeModal = () => {
+    setModal({
+      type: "none",
+      data: undefined,
+      show: false,
+    });
+  };
 
   return (
     <>
@@ -68,6 +94,7 @@ const Page = (props: Props) => {
                 <AiOutlineSearch />
               </InputRightElement>
               <Input
+                backgroundColor={"white"}
                 value={search}
                 onChange={handleChange}
                 placeholder="Search..."
@@ -75,6 +102,7 @@ const Page = (props: Props) => {
               />
             </InputGroup>
             <Select
+              backgroundColor={"white"}
               width={"36"}
               defaultValue="all"
               icon={<BsFilter />}
@@ -84,6 +112,15 @@ const Page = (props: Props) => {
               <option value="linked">Global</option>
               <option value="unlinked">Private</option>
             </Select>
+          </Box>
+          <Box className="py-4 px-0">
+            <Button
+              className="bg-blue-400 text-white hover:bg-blue-600"
+              rounded={"sm"}
+              onClick={() => openAdd()}
+            >
+              Add
+            </Button>
           </Box>
           <div className="grid-cols-3 grid gap-7 mt-10">
             {loading || !templates ? (
@@ -96,7 +133,13 @@ const Page = (props: Props) => {
               ))
             ) : templates.length !== 0 ? (
               templates.map((x) => {
-                return <MessageTemplateCard key={x.id} data={x} openDetail={openDetail}/>;
+                return (
+                  <MessageTemplateCard
+                    key={x.id}
+                    data={x}
+                    openDetail={openDetail}
+                  />
+                );
               })
             ) : (
               <p>No message template data available.</p>
@@ -104,6 +147,21 @@ const Page = (props: Props) => {
           </div>
         </main>
       </Nav>
+      {modal.type === "detail" ? (
+        <MessageDetail
+          show={modal.show}
+          data={modal.data}
+          onClose={closeModal}
+          toDelete={false}
+        />
+      ) : modal.type === "add" ? (
+        <AddMessage
+          isOpen={modal.show}
+          onClose={closeModal}
+          onFail={() => {}}
+          onSuccess={() => {}}
+        />
+      ) : null}
     </>
   );
 };
