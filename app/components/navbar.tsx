@@ -219,8 +219,8 @@ const MobileNav = ({ onOpen, ...rest }: MobileProps) => {
               handleSemesterChange(x);
             }}
           >
-            {semesters?.map((x) => {
-              return <option value={x.semesterID}>{x.description}</option>;
+            {semesters?.map((x, i) => {
+              return <option value={x.semesterID} key={i}>{x.description}</option>;
             })}
           </Select>
         </Menu>

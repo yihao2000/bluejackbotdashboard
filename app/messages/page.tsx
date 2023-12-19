@@ -14,8 +14,9 @@ import { AiOutlineSearch } from "react-icons/ai";
 import { BsFilter } from "react-icons/bs";
 import { MessageTemplate } from "../interfaces/interfaces";
 import MessageTemplateCard from "../components/cards/messagetemplatecard";
-import MessageDetail from "../components/modal/message/messagedetail";
-import AddMessage from "../components/modal/message/addmessage";
+import MessageDetail from "../components/modal/message/MessageDetail";
+import CreateMessageTemplate from "../components/modal/message/CreateMessageTemplate";
+
 type Props = {};
 
 const data: Array<MessageTemplate> = [
@@ -155,7 +156,7 @@ const Page = (props: Props) => {
           toDelete={false}
         />
       ) : modal.type === "add" ? (
-        <AddMessage
+        <CreateMessageTemplate
           isOpen={modal.show}
           onClose={closeModal}
           onFail={() => {}}
