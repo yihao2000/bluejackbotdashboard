@@ -23,14 +23,13 @@ export default function Channels() {
   const [refresh, setRefresh] = useState(false);
 
   useEffect(() => {
-    console.log("REfreshing");
     queryChannels().then((res) => {
-      console.log(res);
       setChannels(transformChannelData(res));
     });
   }, [refresh]);
 
   const refreshPage = () => {
+    console.log("Refreshing");
     setRefresh(!refresh);
   };
 
@@ -66,7 +65,11 @@ export default function Channels() {
             <Box className="grid-cols-3 grid gap-7 mt-10">
               {channels.map((x) => {
                 return (
-                  <ChannelDetailCard channel={x} refreshPage={refreshPage} />
+                  <ChannelDetailCard
+                    channel={x}
+                    refreshPage={refreshPage}
+                    refresh={refresh}
+                  />
                 );
               })}
             </Box>

@@ -50,6 +50,7 @@ import ChannelDetailModal from "../modal/channeldetailmodal";
 interface Data {
   channel: Channel;
   refreshPage: () => void;
+  refresh: boolean;
 }
 
 export default function ChannelDetailCard(props: Data) {
@@ -61,13 +62,11 @@ export default function ChannelDetailCard(props: Data) {
 
   useEffect(() => {
     getStudentClass();
-  }, []);
+  }, [props.channel.channel_subscribers]);
 
   function setLoading() {
     setIsLoading(true);
   }
-
-  function refreshPage() {}
 
   function unsetLoading() {
     setIsLoading(false);
@@ -77,10 +76,6 @@ export default function ChannelDetailCard(props: Data) {
     channelDetailModalDisclosure.onOpen();
   }
 
-  useEffect(() => {
-    console.log(studentClassList);
-  }, [studentClassList]);
-
   const getStudentClass = async () => {
     setLoading();
     try {
@@ -89,7 +84,6 @@ export default function ChannelDetailCard(props: Data) {
           if (x) {
             const res = await queryStudentClass(x);
 
-            // Add id property to each Class object
             res.response.id = x;
 
             console.log(res);
@@ -100,11 +94,8 @@ export default function ChannelDetailCard(props: Data) {
       ).finally(() => {
         unsetLoading();
       });
-
-      // Now 'results' is an array containing the results of all the promises
       setStudentClassList(transformStudentClassResponse(results));
     } catch (error) {
-      // Handle errors if needed
       console.error("Error fetching student class:", error);
     }
   };
@@ -145,11 +136,6 @@ export default function ChannelDetailCard(props: Data) {
               </Text>
             ))
           )}
-          {/* <Text>asdasd</Text>
-          <Text>asdasd</Text>
-          <Text>asdasd</Text>
-          <Text>asdasd</Text>
-          <Text>asdasd</Text> */}
         </Box>
       </CardBody>
       <CardFooter>
@@ -167,16 +153,8 @@ export default function ChannelDetailCard(props: Data) {
         channel={props.channel}
         {...channelDetailModalDisclosure}
         roomClasses={studentClassList}
-        refreshPage={refreshPage}
+        refreshPage={props.refreshPage}
       />
-      {/* {classBotResult && (
-        <ClassDetailModal
-          selectedClass={props.class}
-          {...channelDetailModalDisclosure}
-          classLinkDetail={classBotResult}
-          refreshPage={props.refreshPage}
-        />
-      )} */}
     </Card>
   );
 }

@@ -37,8 +37,6 @@ interface ChannelDetailModalProps {
   roomClasses: RoomClass[];
 }
 
-// ... (imports)
-
 const ChannelDetailModal: React.FC<ChannelDetailModalProps> = ({
   isOpen,
   onClose,
@@ -46,6 +44,22 @@ const ChannelDetailModal: React.FC<ChannelDetailModalProps> = ({
   refreshPage,
   roomClasses,
 }) => {
+  const [groupedClasses, setGroupedClasses] = useState<
+    Record<string, RoomClass[]>
+  >({});
+
+  useEffect(() => {
+    const groups: Record<string, RoomClass[]> = {};
+    roomClasses.forEach((roomClass) => {
+      const key = String(transformClassSubjectFormat(roomClass.subject));
+      if (!groups[key]) {
+        groups[key] = [];
+      }
+      groups[key].push(roomClass);
+    });
+    setGroupedClasses(groups);
+  }, [roomClasses]);
+
   const [classLineGroup, setClassLineGroup] = useState<ClassLineGroup[]>([]);
   const [roomClassToDelete, setRoomClassToDelete] = useState<RoomClass | null>(
     null
@@ -60,15 +74,15 @@ const ChannelDetailModal: React.FC<ChannelDetailModalProps> = ({
   };
 
   const handleConfirmDelete = () => {
-    // Perform the delete action for the classToDelete
-    // ...
-
-    const roomId = roomClassToDelete?.id; // Get the id if it's defined
+    const roomId = roomClassToDelete?.id;
 
     if (roomId) {
+      console.log(roomId);
       setLoading(true);
       removeStudentClass(channel.channel_id, roomId)
-        .then((x) => {})
+        .then((x) => {
+          refreshPage();
+        })
         .catch((err) => {})
         .finally(() => {
           setLoading(false);
@@ -104,27 +118,31 @@ const ChannelDetailModal: React.FC<ChannelDetailModalProps> = ({
             <Text>
               Channel Description: <b>{channel.channel_description}</b>
             </Text>
-
-            <Text display="block">Channel Classes:</Text>
-
-            <Box display="flex" gap="1" flexWrap="wrap">
-              {roomClasses.map((x) => (
-                <Tag
-                  size={"md"}
-                  key={String(x.class)}
-                  borderRadius="full"
-                  variant="solid"
-                  colorScheme="twitter"
-                >
-                  <TagLabel>
-                    {x.class} - {transformClassSubjectFormat(x.subject)}
-                  </TagLabel>
-                  <TagCloseButton onClick={() => handleDeleteClassClick(x)} />
-                </Tag>
-              ))}
-            </Box>
-
             <Divider p="2" />
+            {Object.keys(groupedClasses).map((className) => (
+              <Box key={className}>
+                <Text display="block" py="2">
+                  {className}
+                </Text>
+                <Box display="flex" gap="1" flexWrap="wrap">
+                  {groupedClasses[className].map((x) => (
+                    <Tag
+                      size={"md"}
+                      key={String(x.id)}
+                      borderRadius="full"
+                      variant="solid"
+                      colorScheme="twitter"
+                    >
+                      <TagLabel>{x.class}</TagLabel>
+                      <TagCloseButton
+                        onClick={() => handleDeleteClassClick(x)}
+                      />
+                    </Tag>
+                  ))}
+                </Box>
+                <Divider p="2" />
+              </Box>
+            ))}
           </Box>
         </ModalBody>
 
