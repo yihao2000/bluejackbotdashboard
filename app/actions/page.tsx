@@ -215,6 +215,7 @@ export default function Classes() {
   };
 
   const handleScheduleMessage = () => {
+    console.log(scheduleDate);
     setActionLoading(true);
     console.log(convertDateFormat(scheduleDate));
     //Set Action Loading Animation

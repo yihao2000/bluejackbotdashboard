@@ -18,6 +18,7 @@ import {
   Tag,
   TagLabel,
   TagCloseButton,
+  useTab,
 } from "@chakra-ui/react";
 import { IoMdArrowBack } from "react-icons/io";
 import {
@@ -81,9 +82,24 @@ const ChannelDetailModal: React.FC<ChannelDetailModalProps> = ({
       setLoading(true);
       removeStudentClass(channel.channel_id, roomId)
         .then((x) => {
+          toast({
+            title: "Success",
+            description: "Successfully removed class from channel.",
+            status: "success",
+            duration: 5000,
+            isClosable: true,
+          });
           refreshPage();
         })
-        .catch((err) => {})
+        .catch((err) => {
+          toast({
+            title: "Error",
+            description: "An error occurred while removing class.",
+            status: "error",
+            duration: 5000,
+            isClosable: true,
+          });
+        })
         .finally(() => {
           setLoading(false);
         });

@@ -55,10 +55,18 @@ export interface RoomClass {
   subject: String;
 }
 
-export interface MessageTemplate{
-  id: string,
-  name: string,
-  content: string,
-  data_map: Map<string, any>,
-  category: string,
+export interface MessageTemplate {
+  id: string;
+  name: string;
+  content: string;
+  data_map: Map<string, any>;
+  category: string;
+}
+
+export interface ScheduledMessage {
+  id: string;
+  recipients_string: string;
+  content: string;
+  time: string;
+  scheduler_user_id: string;
 }

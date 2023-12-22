@@ -17,6 +17,7 @@ export const CHANNELS_QUERY = `${API_URL}/channels/getchannels`
 export const CREATE_CHANNEL = `${API_URL}/channels/createchannel`
 export const GET_CLASS_QUERY = `${API_URL}/classes/getstudentclass`
 export const REMOVE_CHANNEL_CLASS = `${API_URL}/channels/removechannelsubscribers`
+export const SCHEDULED_MESSAGES_QUERY = `${API_URL}/messages/getscheduledmessages`
 
 export const queryLinkedClasses = async () => {
     return fetch(LINKED_CLASSES_QUERY)
@@ -300,3 +301,17 @@ export const removeStudentClass = async(channelID: String, classID: String) => {
   } 
   return await response.json();
 }
+
+export const queryScheduledMessages = async () => {
+  const response = await fetch(SCHEDULED_MESSAGES_QUERY, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error("Error fetching data");
+  } 
+  return await response.json();
+} 

@@ -41,7 +41,6 @@ export function transformSemesterApiResponse(responseArray: any) {
 
 
   export function convertDateFormat(date: Date): string {
-  
     // Get individual components of the date
     const year = date.getUTCFullYear();
     const month = (date.getUTCMonth() + 1).toString().padStart(2, '0'); // Months are zero-based
@@ -49,7 +48,6 @@ export function transformSemesterApiResponse(responseArray: any) {
     const hours = date.getUTCHours().toString().padStart(2, '0');
     const minutes = date.getUTCMinutes().toString().padStart(2, '0');
     const seconds = date.getUTCSeconds().toString().padStart(2, '0');
- 
   
     // Determine the UTC offset in minutes
     const utcOffsetMinutes = date.getTimezoneOffset();
@@ -59,7 +57,7 @@ export function transformSemesterApiResponse(responseArray: any) {
     const utcOffsetSign = utcOffsetMinutes < 0 ? '+' : '-';
   
     // Construct the formatted date string
-    const formattedDate = `${year}-${month}-${day} ${hours}:${minutes}:${seconds}UTC${utcOffsetSign}${utcOffsetHours}00`;
+    const formattedDate = `${month}/${day}/${year}, ${hours}:${minutes}:${seconds} ${utcOffsetSign}${utcOffsetHours}00 UTC`;
   
     return formattedDate;
   }
