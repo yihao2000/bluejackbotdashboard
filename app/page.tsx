@@ -7,6 +7,7 @@ import {
   Card,
   CardBody,
   CardHeader,
+  CloseButton,
   HStack,
   Heading,
   Icon,
@@ -14,6 +15,7 @@ import {
   StackDivider,
   Text,
   useColorMode,
+  useDisclosure,
 } from "@chakra-ui/react";
 import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
@@ -22,13 +24,26 @@ import { useSemester } from "./context/SemesterContext";
 import { FiHome } from "react-icons/fi";
 import { queryScheduledMessages } from "./utils/constants";
 import { ScheduledMessage } from "./interfaces/interfaces";
+import { convertAndAdjustDate } from "./utils/formatter";
 
 export default function Home() {
   const session = useSession();
+  const confirmationModalDisclosure = useDisclosure();
 
   const [scheduledMessages, setScheduledMessages] = useState<
     ScheduledMessage[]
   >([]);
+
+  const [scheduledMessage, setScheduledMessage] = useState<ScheduledMessage>();
+
+  const openConfirmationmodal = () => {
+    confirmationModalDisclosure.onOpen();
+  };
+
+  const removeButtonClick = (data: ScheduledMessage) => {
+    openConfirmationmodal();
+    setScheduledMessage(data);
+  };
 
   useEffect(() => {
     queryScheduledMessages().then((x) => {
@@ -50,20 +65,39 @@ export default function Home() {
               </HStack>
             </Box>
             <Box>Scheduled Messages</Box>
-            <Card>
-              <CardBody>
-                <Stack divider={<StackDivider />} spacing="4">
-                  <Box>
-                    <Heading size="xs" textTransform="uppercase">
-                      Summary
-                    </Heading>
-                    <Text pt="2" fontSize="sm">
-                      View a summary of all your clients over the last month.
-                    </Text>
-                  </Box>
-                </Stack>
-              </CardBody>
-            </Card>
+            <Box>
+              <Stack divider={<StackDivider />}>
+                {scheduledMessages.map((x, index) => (
+                  <Card
+                    key={index}
+                    _hover={{
+                      background: "gray.100", // Change the background color to a darker shade on hover
+                    }}
+                  >
+                    <CardHeader textTransform="uppercase" fontWeight="bold">
+                      Scheduled for:
+                      <Text display="inline" color="red">
+                        {convertAndAdjustDate(x.time)}
+                      </Text>
+                      <CloseButton
+                        size="md"
+                        position="absolute"
+                        right="0"
+                        top="0"
+                        m="2"
+                        onClick={() => {
+                          removeButtonClick(x);
+                        }}
+                      />
+                    </CardHeader>
+
+                    <CardBody pt="0" m="0">
+                      <Text fontSize="sm">{x.content}</Text>
+                    </CardBody>
+                  </Card>
+                ))}
+              </Stack>
+            </Box>
           </Box>
         </main>
       </Nav>

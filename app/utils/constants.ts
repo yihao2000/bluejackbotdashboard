@@ -18,6 +18,7 @@ export const CREATE_CHANNEL = `${API_URL}/channels/createchannel`
 export const GET_CLASS_QUERY = `${API_URL}/classes/getstudentclass`
 export const REMOVE_CHANNEL_CLASS = `${API_URL}/channels/removechannelsubscribers`
 export const SCHEDULED_MESSAGES_QUERY = `${API_URL}/messages/getscheduledmessages`
+export const REMOVE_SCHEDULED_MESSAGE = `${API_URL}/messages/removescheduledmessage`
 
 export const queryLinkedClasses = async () => {
     return fetch(LINKED_CLASSES_QUERY)
@@ -315,3 +316,18 @@ export const queryScheduledMessages = async () => {
   } 
   return await response.json();
 } 
+
+export const removeScheduledMessage = async(id: String) => {
+  const response = await fetch(REMOVE_SCHEDULED_MESSAGE, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ id }),
+  });
+
+  if (!response.ok) {
+    throw new Error("Error fetching data");
+  } 
+  return await response.json();
+}
