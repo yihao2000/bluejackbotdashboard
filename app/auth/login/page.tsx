@@ -30,9 +30,11 @@ function LoginBox() {
       password: password,
       redirect: false,
     });
+    // console.log(result)
     if (result?.error == null) {
       window.location.replace("/");
     } else {
+      
       setIsError(result.error);
       // toast({
       //   title: "Error",

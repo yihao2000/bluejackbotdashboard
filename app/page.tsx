@@ -36,6 +36,11 @@ export default function Home() {
     });
   }, []);
 
+  useEffect(() => {
+    console.log(session)
+  }, [session])
+  
+
   return (
     <>
       <Nav>

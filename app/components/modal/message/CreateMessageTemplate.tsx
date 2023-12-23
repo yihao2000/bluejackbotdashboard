@@ -9,10 +9,12 @@ import {
   InputGroup,
   InputRightElement,
   Select,
+  useToast,
 } from "@chakra-ui/react";
 import React, { SyntheticEvent, useState } from "react";
 import ModalTemplate from "../ModalTemplate";
 import { AiOutlinePlus } from "react-icons/ai";
+import { createMessageTemplate } from "@/app/utils/constants";
 
 type Props = {
   isOpen: boolean;
@@ -30,6 +32,7 @@ type FormData = {
   name: string;
   category: string;
   content: string;
+  is_global: boolean,
   // data_map: Map<string, string>;
 };
 
@@ -37,6 +40,7 @@ const defaultData = {
   name: "",
   category: "",
   content: "",
+  is_global: false,
   // data_map: new Map<string, string>(),
 };
 
@@ -56,6 +60,8 @@ const CreateMessageTemplate = (props: Props) => {
     return !s || s.length == 0;
   };
 
+  const toast = useToast();
+
   const isDuplicateParams = (content: string) => {
     const splits = content.split("{?")
     const map = new Map<string,string>();
@@ -66,13 +72,49 @@ const CreateMessageTemplate = (props: Props) => {
         if (data.trim() !== "") {
           const d = data.split("#");
           if (map.has(d[0])) {
-            return true;
+            return {
+              isDuplicate: true,
+              map: undefined,
+            };
           }
           map.set(d[0], d[1]);
         }
       }
     }
-    return false;
+    return {
+      isDuplicate: false,
+      map: map,
+    };
+  }
+
+  const sendData = async (data_map: Map<string,string> | undefined) => {
+    const map = data_map ?? new Map();
+    setLoading(true)
+    try {
+      await createMessageTemplate(
+        formData.name,
+        formData.content,
+        map,
+        formData.is_global,
+        formData.category,
+        'test_id'
+      )
+      toast({
+        title: "Succesful!",
+        status: "success",
+        isClosable: true,
+      });
+
+    } catch (error) {
+      console.log(error)
+      toast({
+        title: "Error! Unable to create channel right now",
+        status: "error",
+        isClosable: true,
+      });
+    }
+
+    setLoading(false);
   }
 
   const handleSubmit = (e: SyntheticEvent) => {
@@ -86,11 +128,13 @@ const CreateMessageTemplate = (props: Props) => {
       setError("Fields should be filled!");
       return;
     }
-
-    if (isDuplicateParams(formData.content)) {
+    const {isDuplicate, map: data_map} = isDuplicateParams(formData.content)
+    if (isDuplicate) {
       setError("Content params should be unique!");
       return;
     }
+    sendData(data_map)
+
   };
 
   const handleCancel = () => {
@@ -148,7 +192,16 @@ const CreateMessageTemplate = (props: Props) => {
           }))
         }
       />
-
+      <Box>Set to Global</Box>
+      <Input
+        value={formData.category}
+        onChange={(e) =>
+          setFormData(() => ({
+            ...formData,
+            category: e.target.value,
+          }))
+        }
+      />
 
       <Box>Category</Box>
       <Input
@@ -207,7 +260,7 @@ const CreateMessageTemplate = (props: Props) => {
             placeholder="Params"
           />
         </InputGroup>
-        <Button onClick={insertParam}>
+        <Button onClick={insertParam} isLoading={loading}>
           <AiOutlinePlus />
         </Button>
       </Box>
