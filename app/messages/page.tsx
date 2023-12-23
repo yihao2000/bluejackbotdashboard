@@ -14,7 +14,7 @@ import { AiOutlineSearch } from "react-icons/ai";
 import { BsFilter } from "react-icons/bs";
 import { MessageTemplate } from "../interfaces/interfaces";
 import MessageTemplateCard from "../components/cards/messagetemplatecard";
-import MessageDetail from "../components/modal/message/MessageDetail";
+import MessageDetail from "../components/modal/message/messagedetail";
 import CreateMessageTemplate from "../components/modal/message/CreateMessageTemplate";
 
 type Props = {};
@@ -69,13 +69,13 @@ const Page = (props: Props) => {
   };
 
   const openAdd = () => {
-    console.log("open")
+    console.log("open");
     setModal({
       type: "add",
       data: undefined,
       show: true,
-    })
-  }
+    });
+  };
 
   const closeModal = () => {
     setModal({
