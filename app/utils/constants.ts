@@ -353,6 +353,8 @@ export const createMessageTemplate = async (
   category: string,
   owner_id: string,
 ) => {
+
+  const obj = Object.fromEntries(data_map);
   const response = await fetch(CREATE_MESSAGE_TEMPLATE, {
     method: "POST",
     headers: {
@@ -361,7 +363,7 @@ export const createMessageTemplate = async (
     body: JSON.stringify({ 
       name: name,
       content: content,
-      data_map: data_map,
+      data_map: obj,
       is_shared: is_shared,
       category: category,
       owner_id: owner_id,
