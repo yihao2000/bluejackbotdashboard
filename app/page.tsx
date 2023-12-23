@@ -58,6 +58,11 @@ export default function Home() {
     });
   }, [refresh]);
 
+  useEffect(() => {
+    console.log(session)
+  }, [session])
+  
+
   return (
     <>
       <Nav>
