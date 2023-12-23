@@ -42,12 +42,12 @@ export function transformSemesterApiResponse(responseArray: any) {
 
   export function convertDateFormat(date: Date): string {
     // Get individual components of the date
-    const year = date.getUTCFullYear();
-    const month = (date.getUTCMonth() + 1).toString().padStart(2, '0'); // Months are zero-based
-    const day = date.getUTCDate().toString().padStart(2, '0');
-    const hours = date.getUTCHours().toString().padStart(2, '0');
-    const minutes = date.getUTCMinutes().toString().padStart(2, '0');
-    const seconds = date.getUTCSeconds().toString().padStart(2, '0');
+    const year = date.getFullYear();
+    const month = (date.getMonth() + 1).toString().padStart(2, '0');
+    const day = date.getDate().toString().padStart(2, '0');
+    const hours = date.getHours().toString().padStart(2, '0');
+    const minutes = date.getMinutes().toString().padStart(2, '0');
+
   
     // Determine the UTC offset in minutes
     const utcOffsetMinutes = date.getTimezoneOffset();
@@ -57,11 +57,12 @@ export function transformSemesterApiResponse(responseArray: any) {
     const utcOffsetSign = utcOffsetMinutes < 0 ? '+' : '-';
   
     // Construct the formatted date string
-    const formattedDate = `${month}/${day}/${year}, ${hours}:${minutes}:${seconds} ${utcOffsetSign}${utcOffsetHours}00 UTC`;
+    const formattedDate = `${year}-${month}-${day} ${hours}:${minutes}:00UTC${utcOffsetSign}${utcOffsetHours}00`;
   
     return formattedDate;
   }
-  
+
+
   export function transformChannelData(data: any[]): Channel[] {
     const transformedData: Channel[] = [];
   
@@ -95,3 +96,43 @@ export function transformSemesterApiResponse(responseArray: any) {
       id: x["response"]["id"]
     }));
   }
+
+
+  export function convertAndAdjustDate(dateString: string) {
+    // Convert the original string to a Date object
+    const originalDate = new Date(dateString);
+  
+    // Add 7 hours to the date
+    originalDate.setHours(originalDate.getHours() + 7);
+  
+    // Manually build the formatted date string
+    const daysOfWeek = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    const dayOfWeek = daysOfWeek[originalDate.getDay()];
+  
+    const day = originalDate.getDate().toString().padStart(2, '0');
+    const month = (originalDate.getMonth() + 1).toString().padStart(2, '0');
+    const year = originalDate.getFullYear();
+  
+    const hours = originalDate.getHours().toString().padStart(2, '0');
+    const minutes = originalDate.getMinutes().toString().padStart(2, '0');
+    const seconds = originalDate.getSeconds().toString().padStart(2, '0');
+  
+    const options: Intl.DateTimeFormatOptions = {
+      weekday: 'short',
+      day: 'numeric',
+      month: 'numeric',
+      year: 'numeric',
+      hour: 'numeric',
+      minute: 'numeric',
+      second: 'numeric',
+      timeZoneName: 'short',
+    };
+  
+    const formattedDate = originalDate.toLocaleString('en-US', options);
+    const [formattedDay, formattedRest] = formattedDate.split(', '); // Splitting the weekday from the rest
+  
+    const timePart = `${hours}:${minutes}:${seconds}`;
+  
+    return `${formattedDay}, ${day}/${month}/${year} ${timePart}`;
+  }
+  
