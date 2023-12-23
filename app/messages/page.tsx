@@ -9,6 +9,7 @@ import {
   InputRightElement,
   Select,
   Skeleton,
+  useToast,
 } from "@chakra-ui/react";
 import { AiOutlineSearch } from "react-icons/ai";
 import { BsFilter } from "react-icons/bs";
@@ -16,6 +17,7 @@ import { MessageTemplate } from "../interfaces/interfaces";
 import MessageTemplateCard from "../components/cards/messagetemplatecard";
 import MessageDetail from "../components/modal/message/messagedetail";
 import CreateMessageTemplate from "../components/modal/message/CreateMessageTemplate";
+import { getMessageTemplates } from "../utils/constants";
 
 type Props = {};
 
@@ -47,6 +49,21 @@ const Page = (props: Props) => {
   const [filter, setFilter] = useState("");
   const [loading, setLoading] = useState(false);
   const [templates, setTemplates] = useState<Array<MessageTemplate>>(data);
+  const toast = useToast();
+  const fetchData = async () => {
+    setLoading(true);
+    try {
+      const res = await getMessageTemplates();
+      setTemplates(res);
+    } catch (error) {
+      toast({
+        title: "Error! Cannot get template data!",
+        status: "error",
+        isClosable: true,
+      });
+    }
+    setLoading(false)
+  }
 
   const [modal, setModal] = useState<ModalState>({
     type: "detail",

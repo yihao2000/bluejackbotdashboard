@@ -15,6 +15,7 @@ import React, { SyntheticEvent, useState } from "react";
 import ModalTemplate from "../ModalTemplate";
 import { AiOutlinePlus } from "react-icons/ai";
 import { createMessageTemplate } from "@/app/utils/constants";
+import { useSession } from "next-auth/react";
 
 type Props = {
   isOpen: boolean;
@@ -54,7 +55,7 @@ const CreateMessageTemplate = (props: Props) => {
     type: "free",
   });
   const [error, setError] = useState("");
-
+  const {data} = useSession();
   const isEmptyString = (str: string) => {
     const s = str.trim();
     return !s || s.length == 0;
@@ -89,7 +90,16 @@ const CreateMessageTemplate = (props: Props) => {
 
   const sendData = async (data_map: Map<string,string> | undefined) => {
     const map = data_map ?? new Map();
+    if (!data?.user.id) {
+      toast({
+        title: "Error! Unable to create channel right now",
+        status: "error",
+        isClosable: true,
+      });
+      return;
+    }
     setLoading(true)
+
     try {
       await createMessageTemplate(
         formData.name,
@@ -97,7 +107,7 @@ const CreateMessageTemplate = (props: Props) => {
         map,
         formData.is_global,
         formData.category,
-        'test_id'
+        data?.user.id
       )
       toast({
         title: "Succesful!",
