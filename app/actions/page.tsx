@@ -12,7 +12,12 @@ import {
   Textarea,
   useColorMode,
 } from "@chakra-ui/react";
-import { CardData, Class, ClassLineGroup } from "../interfaces/interfaces";
+import {
+  CardData,
+  Channel,
+  Class,
+  ClassLineGroup,
+} from "../interfaces/interfaces";
 import ClassCard from "../components/cards/classdetailcard";
 import { BsFilter } from "react-icons/bs";
 import React, { useEffect, useState } from "react";
@@ -23,6 +28,7 @@ import {
   LINKED_CLASSES_QUERY,
   announceMessage,
   queryAssistantClasses,
+  queryChannels,
   queryClassesCourses,
   queryLinkedAssistantClasses,
   queryLinkedClasses,
@@ -37,6 +43,7 @@ import { useSemester } from "../context/SemesterContext";
 import {
   convertDateFormat,
   formatTime,
+  transformChannelData,
   transformClassApiReponse,
   transformClassSubjectFormat,
 } from "../utils/formatter";
@@ -68,6 +75,12 @@ export default function Classes() {
 
   const [refresh, setRefresh] = useState(false);
 
+  const [channels, setChannels] = useState<Channel[]>([]);
+
+  const [selectedChannels, setSelectedChannels] = useState<string[]>([]);
+
+  const [channelLoading, setChannelLoading] = useState(false);
+
   const getClassessubjects = (classes: Class[]) => {
     const subjectSet = new Set<string>();
 
@@ -78,10 +91,9 @@ export default function Classes() {
     setsubjects(Array.from(subjectSet));
   };
 
-  const fetchData = async () => {
+  const loadAssistantClasses = async () => {
+    setclassLoading(true);
     try {
-      setclassLoading(true);
-
       if (session.data?.user.username != null && selectedSemester != null) {
         const classesResponse = await queryAssistantClasses(
           session.data?.user.username,
@@ -113,7 +125,7 @@ export default function Classes() {
     } catch (error) {
       toast({
         title: "Error",
-        description: "An error occurred while fetching data.",
+        description: "An error occurred while fetching class data.",
         status: "error",
         duration: 5000,
         isClosable: true,
@@ -121,6 +133,33 @@ export default function Classes() {
     } finally {
       setclassLoading(false);
     }
+  };
+
+  const loadChannels = async () => {
+    setChannelLoading(true);
+
+    queryChannels()
+      .then((res) => {
+        setChannels(transformChannelData(res));
+      })
+      .catch((err) => {
+        toast({
+          title: "Error",
+          description: "An error occurred while fetching channels data.",
+          status: "error",
+          duration: 5000,
+          isClosable: true,
+        });
+      })
+      .finally(() => {
+        setChannelLoading(false);
+      });
+  };
+  const fetchData = async () => {
+    setChannelLoading(true);
+
+    loadAssistantClasses();
+    loadChannels();
   };
 
   const clearSelectedClassesData = () => {
@@ -138,6 +177,7 @@ export default function Classes() {
   useEffect(() => {
     fetchData();
     clearSelectedClassesData();
+    clearSelectedChannels();
     clearsubjects();
     clearMessages();
   }, [refresh, selectedSemester]);
@@ -153,16 +193,30 @@ export default function Classes() {
   function clearSelectedClasses() {
     setselectedClasses([]);
   }
+
+  function clearSelectedChannels() {
+    setSelectedChannels([]);
+  }
   const handleSelectChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
     setSelectedOption(event.target.value);
     clearSelectedClasses();
   };
 
-  const handleCardClick = (card: Class) => {
+  const handleClassCardClick = (card: Class) => {
     if (selectedClasses.includes(card.id)) {
       setselectedClasses(selectedClasses.filter((id) => id !== card.id));
     } else {
       setselectedClasses([...selectedClasses, card.id]);
+    }
+  };
+
+  const handleChannelCardClick = (card: Channel) => {
+    if (selectedChannels.includes(card.channel_id)) {
+      setSelectedChannels(
+        selectedChannels.filter((id) => id !== card.channel_id)
+      );
+    } else {
+      setSelectedChannels([...selectedChannels, card.channel_id]);
     }
   };
 
@@ -179,75 +233,124 @@ export default function Classes() {
     refreshPage();
   };
 
+  const getRecipients = (): string[] => {
+    let recipients: string[] = [];
+
+    if (selectedClasses.length > 0) {
+      recipients = selectedClasses;
+      console.log(recipients);
+    }
+
+    if (selectedChannels.length > 0) {
+      const channelSubscribers = selectedChannels
+        .map((channelId) => {
+          const channel = channels.find((c) => c.channel_id === channelId);
+          return channel?.channel_subscribers || [];
+        })
+        .flat();
+
+      recipients = recipients.concat(
+        channelSubscribers.filter(
+          (subscriber) => !recipients.includes(subscriber)
+        )
+      );
+    }
+
+    return recipients;
+  };
+
   const handleAnnounceMessage = () => {
-    //Set Action Loading Animation
     setActionLoading(true);
-    announceMessage(selectedClasses, message)
-      .then((x) => {
-        console.log(x);
-        if (x.statusCode === 500) {
+
+    const recipients = getRecipients();
+
+    if (recipients.length > 0) {
+      announceMessage(recipients, message)
+        .then((x) => {
+          if (x.statusCode === 500) {
+            toast({
+              title: "API Error",
+              description: x.message,
+              status: "error",
+              duration: 5000,
+              isClosable: true,
+            });
+          } else if (x.statusCode === 200) {
+            showAnnouncementModal();
+          }
+        })
+        .catch((error) => {
+          console.error("API Error:", error);
           toast({
-            title: "API Error",
-            description: x.message,
+            title: "Error",
+            description: error.message,
             status: "error",
             duration: 5000,
             isClosable: true,
           });
-        } else if (x.statusCode === 200) {
-          //Alert Munculin
-          showAnnouncementModal();
-        }
-        console.log(x);
-      })
-      .catch((error) => {
-        console.error("API Error:", error);
-        toast({
-          title: "Error",
-          description: error.message,
-          status: "error",
-          duration: 5000,
-          isClosable: true,
+        })
+        .finally(() => {
+          setActionLoading(false);
         });
-      })
-      .finally(() => {
-        setActionLoading(false);
+    } else {
+      toast({
+        title: "Error",
+        description:
+          "Please select classes or channels to send the announcement.",
+        status: "error",
+        duration: 5000,
+        isClosable: true,
       });
+
+      setActionLoading(false);
+    }
   };
 
   const handleScheduleMessage = () => {
-    console.log(scheduleDate);
     setActionLoading(true);
-    console.log(convertDateFormat(scheduleDate));
-    //Set Action Loading Animation
-    scheduleMessage(selectedClasses, message, convertDateFormat(scheduleDate))
-      .then((x) => {
-        if (x.statusCode === 500) {
+
+    const recipients = getRecipients();
+
+    if (recipients.length > 0) {
+      scheduleMessage(recipients, message, convertDateFormat(scheduleDate))
+        .then((x) => {
+          if (x.statusCode === 500) {
+            toast({
+              title: "API Error",
+              description: x.message,
+              status: "error",
+              duration: 5000,
+              isClosable: true,
+            });
+          } else if (x.statusCode === 200) {
+            showAnnouncementModal();
+          }
+        })
+        .catch((error) => {
+          console.error("API Error:", error);
           toast({
-            title: "API Error",
-            description: x.message,
+            title: "Error",
+            description: error.message,
             status: "error",
             duration: 5000,
             isClosable: true,
           });
-        } else if (x.statusCode === 200) {
-          //Alert Munculin
-          showAnnouncementModal();
-        }
-        console.log(x);
-      })
-      .catch((error) => {
-        console.error("API Error:", error);
-        toast({
-          title: "Error",
-          description: error.message,
-          status: "error",
-          duration: 5000,
-          isClosable: true,
+        })
+        .finally(() => {
+          setActionLoading(false);
         });
-      })
-      .finally(() => {
-        setActionLoading(false);
+    } else {
+      toast({
+        title: "Error",
+        description:
+          "Please select classes or channels to send the announcement.",
+        status: "error",
+        duration: 5000,
+        isClosable: true,
       });
+
+      setActionLoading(false);
+    }
   };
 
   const handleAnnounceClick = async () => {
@@ -277,22 +380,18 @@ export default function Classes() {
   };
 
   const handleSelectSpecificClick = (subject: string) => {
-    // Filter the classes to include only those with subject === subject
     const classesInsubject = classes.filter((cls) => cls.subject === subject);
 
-    // Check if all the classes in this subject are already selected
     const allClassesSelected = classesInsubject.every((cls) =>
       selectedClasses.includes(cls.id)
     );
 
     if (allClassesSelected) {
-      // If all classes are selected, remove them
       const newSelectedClasses = selectedClasses.filter(
         (classId) => !classesInsubject.map((cls) => cls.id).includes(classId)
       );
       setselectedClasses(newSelectedClasses);
     } else {
-      // If not all classes are selected, add them
       const classIdsInsubject = classesInsubject.map((cls) => cls.id);
       setselectedClasses([...selectedClasses, ...classIdsInsubject]);
     }
@@ -321,9 +420,33 @@ export default function Classes() {
 
             {selectedOption != "" && (
               <>
-                {" "}
                 <Text>
-                  Pick classes that you want to perform selected action
+                  Pick <b>channels</b> that you want to perform selected action
+                </Text>
+                {!channelLoading ? (
+                  <Box
+                    display={{ base: "block", md: "flex" }}
+                    flexWrap="wrap"
+                    gap="2"
+                  >
+                    {channels.map((x) => {
+                      return (
+                        <SelectableCard
+                          data={x}
+                          itemType="channel"
+                          key={x.channel_id}
+                          onClick={() => handleChannelCardClick(x)}
+                          isSelected={selectedChannels.includes(x.channel_id)}
+                        />
+                      );
+                    })}
+                  </Box>
+                ) : (
+                  <Text>sadsa</Text>
+                )}
+                <Box></Box>{" "}
+                <Text>
+                  Pick <b>classes</b> that you want to perform selected action
                 </Text>
                 {!classLoading ? (
                   <>
@@ -370,14 +493,15 @@ export default function Classes() {
                     <Box
                       display={{ base: "block", md: "flex" }}
                       flexWrap="wrap"
-                      gap="5"
+                      gap="2"
                     >
                       {classes &&
                         classes.map((x) => (
                           <SelectableCard
+                            data={x}
+                            itemType="class"
                             key={x.id}
-                            currentClass={x}
-                            onClick={() => handleCardClick(x)}
+                            onClick={() => handleClassCardClick(x)}
                             isSelected={selectedClasses.includes(x.id)}
                           />
                         ))}
@@ -390,7 +514,7 @@ export default function Classes() {
             )}
 
             {selectedOption == "schedulemessage" &&
-              selectedClasses.length != 0 && (
+              (selectedClasses.length != 0 || selectedChannels.length != 0) && (
                 <>
                   <Text>Please select the scheduled message date</Text>
                   <Box width="sm" display="flex" gap="2">
@@ -414,7 +538,7 @@ export default function Classes() {
                 </>
               )}
 
-            {selectedClasses.length != 0 && (
+            {(selectedClasses.length != 0 || selectedChannels.length != 0) && (
               <>
                 <Text>Please enter the announcement</Text>
                 <Textarea

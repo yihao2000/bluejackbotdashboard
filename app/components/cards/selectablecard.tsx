@@ -1,18 +1,26 @@
 import React from "react";
 import { Box, Text, useColorModeValue } from "@chakra-ui/react";
-import { Class } from "@/app/interfaces/interfaces";
 import { transformClassSubjectFormat } from "@/app/utils/formatter";
 import { PiClipboardTextLight } from "react-icons/pi";
 import { RiGroupLine } from "react-icons/ri";
 import { MdOutlineMeetingRoom } from "react-icons/md";
+import { Channel, Class } from "@/app/interfaces/interfaces";
 
-type CardProps = {
-  currentClass: Class;
+// ... (imports)
+
+type SelectableCardProps = {
+  data: Channel | Class;
   onClick: () => void;
   isSelected: boolean;
+  itemType: "channel" | "class";
 };
 
-function SelectableCard({ currentClass, onClick, isSelected }: CardProps) {
+function SelectableCard({
+  data,
+  onClick,
+  isSelected,
+  itemType,
+}: SelectableCardProps) {
   return (
     <Box
       minWidth="md"
@@ -28,21 +36,29 @@ function SelectableCard({ currentClass, onClick, isSelected }: CardProps) {
     >
       <Box mb="2">
         <Text fontSize="lg" fontWeight="bold">
-          {transformClassSubjectFormat(currentClass.subject)}
+          {itemType === "class"
+            ? transformClassSubjectFormat((data as Class).subject)
+            : itemType === "channel"
+            ? (data as Channel).channel_name
+            : null}
         </Text>
       </Box>
-      <Box display="flex" className="items-center gap-2">
-        <PiClipboardTextLight />
-        <Text fontSize="sm">{currentClass.class}</Text>
-      </Box>
-      <Box display="flex" className="items-center gap-2">
-        <RiGroupLine />
-        <Text fontSize="sm">{currentClass.assistant}</Text>
-      </Box>
-      <Box display="flex" className="items-center gap-2">
-        <MdOutlineMeetingRoom />
-        <Text fontSize="sm">{currentClass.room}</Text>
-      </Box>
+      {itemType === "class" && (
+        <>
+          <Box display="flex" className="items-center gap-2">
+            <PiClipboardTextLight />
+            <Text fontSize="sm">{(data as Class).class}</Text>
+          </Box>
+          <Box display="flex" className="items-center gap-2">
+            <RiGroupLine />
+            <Text fontSize="sm">{(data as Class).assistant}</Text>
+          </Box>
+          <Box display="flex" className="items-center gap-2">
+            <MdOutlineMeetingRoom />
+            <Text fontSize="sm">{(data as Class).room}</Text>
+          </Box>
+        </>
+      )}
     </Box>
   );
 }
