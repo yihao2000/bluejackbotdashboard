@@ -1,3 +1,5 @@
+import { ScheduledMessage } from "@/app/interfaces/interfaces";
+import { removeScheduledMessage } from "@/app/utils/constants";
 import {
   Box,
   Button,
@@ -9,6 +11,7 @@ import {
   ModalHeader,
   ModalOverlay,
   useDisclosure,
+  useToast,
 } from "@chakra-ui/react";
 
 interface ConfirmationProps {
@@ -16,7 +19,9 @@ interface ConfirmationProps {
   onOpen: () => void;
   onClose: () => void;
   title: string;
-  content: string;
+  content: ScheduledMessage | undefined;
+  description: string;
+  refreshPage: () => void;
 }
 
 export const ConfirmationModal: React.FC<ConfirmationProps> = ({
@@ -25,32 +30,56 @@ export const ConfirmationModal: React.FC<ConfirmationProps> = ({
   onClose,
   title,
   content,
+  description,
+  refreshPage,
 }) => {
+  const toast = useToast();
+  const handleDeleteScheduledMessage = () => {
+    if (content?.id) {
+      removeScheduledMessage(content?.id)
+        .then((x) => {
+          toast({
+            title: "Success",
+            description: "Scheduled message successfuly removed !",
+            status: "success",
+            duration: 5000,
+            isClosable: true,
+          });
+          onClose();
+          refreshPage();
+        })
+        .catch((err) => {
+          console.log(err);
+        });
+    }
+  };
+
+  const handleConfirmClick = () => {
+    handleDeleteScheduledMessage();
+  };
+
   return (
     <>
       <Modal onClose={onClose} isOpen={isOpen} isCentered>
         <ModalOverlay />
         <ModalContent>
-          <ModalHeader></ModalHeader>
+          <ModalHeader>{title}</ModalHeader>
           <ModalCloseButton />
           <ModalBody>
-            <Box
-              display="flex"
-              justifyContent="center"
-              alignItems="center"
-              flexDirection="column"
-              gap="2"
-            >
-              <Box as="span" display="inline-block" fontSize="xl">
-                {title}
-              </Box>
-              <Box color="success.25" fontWeight="bold" fontSize="2xl">
-                {title}
-              </Box>
-              <Box fontSize="m">{content}</Box>
+            <Box>
+              <Box fontSize="l">{description}</Box>
+              <Box fontSize="m"></Box>
             </Box>
           </ModalBody>
-          <ModalFooter>
+          <ModalFooter display="flex" gap="2">
+            <Button
+              colorScheme="red"
+              onClick={() => {
+                handleConfirmClick();
+              }}
+            >
+              Confirm
+            </Button>
             <Button onClick={onClose}>Close</Button>
           </ModalFooter>
         </ModalContent>
