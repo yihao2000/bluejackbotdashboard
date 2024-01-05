@@ -61,7 +61,9 @@ export default function ChannelDetailCard(props: Data) {
   const toast = useToast();
 
   useEffect(() => {
-    getStudentClass();
+    if (props.channel.channel_subscribers[0] != null) {
+      getStudentClass();
+    }
   }, [props.channel.channel_subscribers]);
 
   function setLoading() {
@@ -131,7 +133,7 @@ export default function ChannelDetailCard(props: Data) {
           ) : (
             studentClassList &&
             studentClassList.map((x) => (
-              <Text fontSize="sm" m="0" p="0">
+              <Text fontSize="sm" m="0" p="0" key={x.id as React.Key}>
                 {x.class}
               </Text>
             ))

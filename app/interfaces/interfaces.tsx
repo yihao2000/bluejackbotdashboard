@@ -22,6 +22,13 @@ export interface Semester {
   description: string;
 }
 
+export interface ClassTransaction {
+  className: string;
+  classTransactionId: string;
+  lecturerCode: string;
+  lecturerName: string;
+}
+
 export interface Class {
   assistant: string;
   campus: string;
@@ -69,4 +76,10 @@ export interface ScheduledMessage {
   content: string;
   time: string;
   scheduler_user_id: string;
+}
+
+export interface CourseOutline {
+  id: string;
+  name: string;
+  subjects: string;
 }

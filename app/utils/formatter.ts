@@ -23,6 +23,43 @@ export function transformSemesterApiResponse(responseArray: any) {
     }));
   }
 
+  export function transformCourseOutlineApiResponse(responseArray: any) {
+    return responseArray.response.map((x: any) => ({
+      id: x["a:CourseOutlineId"],
+      name: transformClassSubjectFormat(x["a:Name"]),
+      subjects: x["a:Subjects"]
+    }));
+  }
+
+  export function transformClassNameFormat(className: string){
+    const parts = className.split('-');
+    
+    if (parts.length === 2) {
+        const formattedString = `${parts[0]} (LAB) - ${parts[1]} (LEC)`;
+        return formattedString;
+    } else {
+        // Handle the case when the input string doesn't have the expected format
+        return className;
+    }
+  }
+
+  export function transformClassTransactionApiResponse(responseArray: any) {
+    console.log(responseArray)
+    if (Array.isArray(responseArray.response)) {
+      return responseArray.response.map((x: any) => ({
+        className: x["a:ClassName"],
+        classTransactionId: transformClassSubjectFormat(x["a:ClassTransactionId"]),
+        lecturerCode: x["a:LecturerCode"],
+        lecturerName: x["a:LecturerName"]
+      }));
+    } else {
+      // Handle the case when responseArray.response is not an array
+      console.error("Response is not an array:", responseArray.response);
+      return [];
+    }
+  }
+  
+
 
   export function transformClassSubjectFormat(subject: String){
     return subject.split("-").join(" - ")

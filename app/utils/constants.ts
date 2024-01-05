@@ -21,6 +21,9 @@ export const SCHEDULED_MESSAGES_QUERY = `${API_URL}/messages/getscheduledmessage
 export const CREATE_MESSAGE_TEMPLATE = `${API_URL}/message_templates/createmessagetemplate`;
 export const GET_MESSAGE_TEMPLATES = `${API_URL}/message_templates/getmessagetemplates`;
 export const REMOVE_SCHEDULED_MESSAGE = `${API_URL}/messages/removescheduledmessage`
+export const GET_ACTIVE_SEMESTER_COURSE_OUTLINE = `${API_URL}/semesters/getactivesemestercourseoutlines`
+export const GET_CLASS_TRANSACTION_BY_COURSE_OUTLINE_AND_SEMESTER = `${API_URL}/classes/getclasstransactionbycourseoutlineandsemester`
+
 
 export const queryLinkedClasses = async () => {
   return fetch(LINKED_CLASSES_QUERY).then((response) => {
@@ -374,4 +377,51 @@ export const createMessageTemplate = async (
     throw new Error("Error fetching data");
   }
   return await response.json();
+};
+
+export const getActiveSemesterCourseOutlines = async (messierID: string, semesterID: string) => {
+  try {
+    const response = await fetch(GET_ACTIVE_SEMESTER_COURSE_OUTLINE, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ messierID, semesterID }),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(`API request failed: ${errorData.message}`);
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error("API Error:", error);
+    // Re-throw the error to propagate it
+    throw error;
+  }
+};
+
+
+export const getClassTransactionByCourseOutlineAndSemester = async (semesterID: string, courseOutlineID: string) => {
+  try {
+    const response = await fetch(GET_CLASS_TRANSACTION_BY_COURSE_OUTLINE_AND_SEMESTER, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ semesterID, courseOutlineID }),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(`API request failed: ${errorData.message}`);
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error("API Error:", error);
+    // Re-throw the error to propagate it
+    throw error;
+  }
 };

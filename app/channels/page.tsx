@@ -66,6 +66,7 @@ export default function Channels() {
               {channels.map((x) => {
                 return (
                   <ChannelDetailCard
+                    key={x.channel_id}
                     channel={x}
                     refreshPage={refreshPage}
                     refresh={refresh}
