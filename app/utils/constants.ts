@@ -1,3 +1,5 @@
+import { Item } from "../interfaces/interfaces";
+
 export const API_URL = "http://localhost:3001";
 
 export const CLASSES_DETAIL_QUERY = `${API_URL}/classes/query/classesdetail`;
@@ -23,7 +25,7 @@ export const GET_MESSAGE_TEMPLATES = `${API_URL}/message_templates/getmessagetem
 export const REMOVE_SCHEDULED_MESSAGE = `${API_URL}/messages/removescheduledmessage`
 export const GET_ACTIVE_SEMESTER_COURSE_OUTLINE = `${API_URL}/semesters/getactivesemestercourseoutlines`
 export const GET_CLASS_TRANSACTION_BY_COURSE_OUTLINE_AND_SEMESTER = `${API_URL}/classes/getclasstransactionbycourseoutlineandsemester`
-
+export const ADD_CHANNEL_SUBSCRIBERS = `${API_URL}/channels/addchannelsubscribers`
 
 export const queryLinkedClasses = async () => {
   return fetch(LINKED_CLASSES_QUERY).then((response) => {
@@ -411,6 +413,32 @@ export const getClassTransactionByCourseOutlineAndSemester = async (semesterID: 
         "Content-Type": "application/json",
       },
       body: JSON.stringify({ semesterID, courseOutlineID }),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(`API request failed: ${errorData.message}`);
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error("API Error:", error);
+    // Re-throw the error to propagate it
+    throw error;
+  }
+};
+
+export const addChannelSubscribers = async (
+  channelID: String,
+  classesID: String[]
+) => {
+  try {
+    const response = await fetch(ADD_CHANNEL_SUBSCRIBERS, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ channelID, classesID }),
     });
 
     if (!response.ok) {

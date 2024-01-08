@@ -44,13 +44,11 @@ export function transformSemesterApiResponse(responseArray: any) {
   }
 
   export function transformClassTransactionApiResponse(responseArray: any) {
-    console.log(responseArray)
     if (Array.isArray(responseArray.response)) {
       return responseArray.response.map((x: any) => ({
-        className: x["a:ClassName"],
-        classTransactionId: transformClassSubjectFormat(x["a:ClassTransactionId"]),
-        lecturerCode: x["a:LecturerCode"],
-        lecturerName: x["a:LecturerName"]
+        label: transformClassSubjectFormat(x["a:ClassName"]),
+        value: x["a:ClassTransactionId"],
+
       }));
     } else {
       // Handle the case when responseArray.response is not an array

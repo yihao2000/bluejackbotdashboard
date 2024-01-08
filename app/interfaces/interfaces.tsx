@@ -29,6 +29,11 @@ export interface ClassTransaction {
   lecturerName: string;
 }
 
+export interface Item {
+  label: string;
+  value: string;
+}
+
 export interface Class {
   assistant: string;
   campus: string;

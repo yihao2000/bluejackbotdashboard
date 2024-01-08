@@ -130,13 +130,16 @@ export default function ChannelDetailCard(props: Data) {
           <MdOutlineMeetingRoom />
           {isLoading ? (
             <Skeleton width="20" height="20px" />
-          ) : (
-            studentClassList &&
+          ) : studentClassList.length > 0 ? (
             studentClassList.map((x) => (
               <Text fontSize="sm" m="0" p="0" key={x.id as React.Key}>
                 {x.class}
               </Text>
             ))
+          ) : (
+            <Text color="gray" fontSize="sm">
+              -
+            </Text>
           )}
         </Box>
       </CardBody>

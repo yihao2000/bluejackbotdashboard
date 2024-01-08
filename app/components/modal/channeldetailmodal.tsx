@@ -9,11 +9,9 @@ import {
   ModalHeader,
   ModalOverlay,
   Flex,
-  Input,
   Box,
   Text,
   Divider,
-  Tooltip,
   useToast,
   Tag,
   TagLabel,
@@ -28,6 +26,7 @@ import {
   ClassLineGroup,
   ClassTransaction,
   CourseOutline,
+  Item,
   RoomClass,
 } from "@/app/interfaces/interfaces";
 import { BsQuestionCircle } from "react-icons/bs";
@@ -38,6 +37,7 @@ import {
   transformCourseOutlineApiResponse,
 } from "@/app/utils/formatter";
 import {
+  addChannelSubscribers,
   getActiveSemesterCourseOutlines,
   getClassTransactionByCourseOutlineAndSemester,
   removeStudentClass,
@@ -50,6 +50,8 @@ import {
   AutoCompleteItem,
   AutoCompleteList,
 } from "@choc-ui/chakra-autocomplete";
+
+import { CUIAutoComplete } from "chakra-ui-autocomplete";
 
 interface ChannelDetailModalProps {
   isOpen: boolean;
@@ -70,6 +72,15 @@ const ChannelDetailModal: React.FC<ChannelDetailModalProps> = ({
   const semester = useSemester();
   const toast = useToast();
 
+  useEffect(() => {
+    if (session && semester) {
+      fetchGroupedClasses();
+      fetchCourseOutlines();
+    }
+  }, [roomClasses, session, semester]);
+
+  const [selectedClassess, setSelectedClasses] = React.useState<Item[]>([]);
+
   const [groupedClasses, setGroupedClasses] = useState<
     Record<string, RoomClass[]>
   >({});
@@ -89,7 +100,7 @@ const ChannelDetailModal: React.FC<ChannelDetailModalProps> = ({
 
   const [classLoading, setClassLoading] = useState(false);
 
-  const [courseClasses, setCourseClasses] = useState<ClassTransaction[]>([]);
+  const [courseClasses, setCourseClasses] = useState<Item[] | null>(null);
 
   const fetchGroupedClasses = () => {
     const groups: Record<string, RoomClass[]> = {};
@@ -116,13 +127,11 @@ const ChannelDetailModal: React.FC<ChannelDetailModalProps> = ({
     }
   };
 
-  useEffect(() => {
-    if (session && semester) {
-      console.log("Kepanggil");
-      fetchGroupedClasses();
-      fetchCourseOutlines();
+  const handleSelectedClassesChange = (selectedClass?: Item[]) => {
+    if (selectedClass) {
+      setSelectedClasses(selectedClass);
     }
-  }, [roomClasses, session, semester]);
+  };
 
   const handleDeleteClassClick = (roomClass: RoomClass) => {
     setRoomClassToDelete(roomClass);
@@ -185,9 +194,23 @@ const ChannelDetailModal: React.FC<ChannelDetailModalProps> = ({
     return selectedCourseOutline ? selectedCourseOutline.id : null;
   };
 
+  const filterClassesById = (
+    res: any,
+    groupedClasses: Record<string, RoomClass[]>
+  ) => {
+    const transformedResponse = transformClassTransactionApiResponse(res);
+
+    return transformedResponse.filter((x: any) => {
+      const classId = x.value;
+      return !Object.values(groupedClasses).some((classes) =>
+        classes.some((roomClass) => String(roomClass.id) === String(classId))
+      );
+    });
+  };
+
   const getCourseOutlineClasses = (selectedId: string | null) => {
     if (selectedId != null && semester.selectedSemester?.semesterID != null) {
-      //Opsional dipake ato engga
+      // Optional, you can still use this line if needed
       setSelectedCourseOutlineId(selectedId);
 
       setClassLoading(true);
@@ -196,8 +219,9 @@ const ChannelDetailModal: React.FC<ChannelDetailModalProps> = ({
         selectedId
       )
         .then((x) => {
-          // setCourseClasses(transformClassTransactionApiResponse(x));
-          transformClassTransactionApiResponse(x);
+          const filteredClasses = filterClassesById(x, groupedClasses);
+          console.log(filteredClasses);
+          setCourseClasses(filteredClasses);
         })
         .finally(() => {
           setClassLoading(false);
@@ -213,6 +237,47 @@ const ChannelDetailModal: React.FC<ChannelDetailModalProps> = ({
     getCourseOutlineClasses(selectedId);
   };
 
+  const clearData = () => {
+    setselectedCourseOutlineName("");
+    setSelectedCourseOutlineId("");
+    setCourseClasses(null);
+    setSelectedClasses([]);
+  };
+
+  const handleBackButtonClicked = () => {
+    setAddMoreClass(false);
+    clearData();
+  };
+
+  const handleAddSelectedClassesClick = () => {
+    console.log("Keclick");
+
+    // Extracting only the 'value' property from each item in selectedClassess
+    const extractedClassesID = selectedClassess.map((item) => item.value);
+
+    // Ensure that extractedClassesID is an array and not empty
+    if (!Array.isArray(extractedClassesID) || extractedClassesID.length === 0) {
+      // Handle the case where no classes are selected
+      console.error("No classes selected.");
+      return;
+    }
+
+    addChannelSubscribers(channel.channel_id, extractedClassesID)
+      .then((response) => {
+        console.log(response);
+        refreshPage();
+        handleModalClose();
+      })
+      .catch((error) => {
+        console.error("Error adding channel subscribers:", error);
+        // Handle the error appropriately
+        // You may want to show a toast or update the UI to inform the user
+      })
+      .finally(() => {
+        clearData();
+      });
+  };
+
   return (
     <Modal isOpen={isOpen} onClose={onClose}>
       <ModalOverlay />
@@ -224,7 +289,7 @@ const ChannelDetailModal: React.FC<ChannelDetailModalProps> = ({
                 <IconButton
                   aria-label="Back"
                   icon={<IoMdArrowBack />}
-                  onClick={() => setAddMoreClass(false)}
+                  onClick={() => handleBackButtonClicked()}
                   size="sm"
                   variant="ghost"
                 />
@@ -276,7 +341,6 @@ const ChannelDetailModal: React.FC<ChannelDetailModalProps> = ({
             </Box>
           ) : (
             <Box>
-              {" "}
               <AutoComplete
                 onChange={(x: string) => handleCourseOutlineChange(x)}
               >
@@ -290,6 +354,16 @@ const ChannelDetailModal: React.FC<ChannelDetailModalProps> = ({
                 </AutoCompleteList>
               </AutoComplete>
             </Box>
+          )}
+          {addMoreClass && courseClasses != null && (
+            <CUIAutoComplete
+              placeholder="Search classes"
+              items={courseClasses}
+              selectedItems={selectedClassess}
+              onSelectedItemsChange={(changes: any) =>
+                handleSelectedClassesChange(changes.selectedItems)
+              }
+            />
           )}
         </ModalBody>
 
@@ -310,12 +384,8 @@ const ChannelDetailModal: React.FC<ChannelDetailModalProps> = ({
           )}
 
           {!roomClassToDelete && (
-            <Box
-              display="flex"
-              justifyContent={addMoreClass ? "flex-end" : "space-between"}
-              width="full"
-            >
-              {!addMoreClass && (
+            <Box display="flex" justifyContent="space-between" width="full">
+              {!addMoreClass && !roomClassToDelete && (
                 <Button
                   onClick={() => {
                     handleAddMoreClassClick();
@@ -324,6 +394,15 @@ const ChannelDetailModal: React.FC<ChannelDetailModalProps> = ({
                   Add More Class
                 </Button>
               )}
+
+              <Button
+                visibility={selectedClassess.length > 0 ? "visible" : "hidden"}
+                onClick={() => {
+                  handleAddSelectedClassesClick();
+                }}
+              >
+                Add Selected Classes
+              </Button>
 
               <Button
                 colorScheme="red"
