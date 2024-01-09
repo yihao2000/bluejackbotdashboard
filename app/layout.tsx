@@ -5,6 +5,7 @@ import { Inter } from "next/font/google";
 import { Providers } from "./providers";
 import { ColorModeScript } from "@chakra-ui/react";
 import theme from "./theme";
+import Script from "next/script";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -20,6 +21,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
+      <Script src='/messier/aes.js'/>
       <body className={inter.className}>
         <Providers>{children}</Providers>
       </body>
