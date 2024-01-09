@@ -6,6 +6,7 @@ import {
   CardFooter,
   CardHeader,
   CircularProgress,
+  CloseButton,
   Heading,
   Image,
   Modal,
@@ -106,10 +107,21 @@ export default function ChannelDetailCard(props: Data) {
     openDetailModal();
   };
 
+  const handleDeleteChannelClick = () => {};
+
   return (
     <Card className="hover:cursor-pointer hover:scale-105 transition">
       <CardHeader>
         <Heading size="md">{props.channel.channel_name}</Heading>
+        <CloseButton
+          size="sm"
+          position="absolute"
+          top="1rem"
+          right="1rem"
+          onClick={() => {
+            handleDeleteChannelClick();
+          }}
+        />
       </CardHeader>
       <CardBody py={0}>
         <Box display="flex" className="items-start gap-2">

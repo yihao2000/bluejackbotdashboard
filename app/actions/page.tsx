@@ -311,8 +311,13 @@ export default function Classes() {
 
     const recipients = getRecipients();
 
-    if (recipients.length > 0) {
-      scheduleMessage(recipients, message, convertDateFormat(scheduleDate))
+    if (recipients.length > 0 && session.data != null) {
+      scheduleMessage(
+        recipients,
+        message,
+        convertDateFormat(scheduleDate),
+        session.data?.user.id
+      )
         .then((x) => {
           if (x.statusCode === 500) {
             toast({

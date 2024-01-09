@@ -418,7 +418,11 @@ const ChannelDetailModal: React.FC<ChannelDetailModalProps> = ({
               )}
 
               <Button
-                visibility={selectedClassess.length > 0 ? "visible" : "hidden"}
+                visibility={
+                  addMoreClass && selectedClassess.length > 0
+                    ? "visible"
+                    : "hidden"
+                }
                 onClick={() => {
                   handleAddSelectedClassesClick();
                 }}

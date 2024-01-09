@@ -172,7 +172,8 @@ export const announceMessage = async (classes: string[], message: string) => {
 export const scheduleMessage = async (
   classes: string[],
   message: string,
-  scheduleDate: string
+  scheduleDate: string,
+  schedulerUserId: string,
 ) => {
   try {
     const response = await fetch(SCHEDULE_MESSAGE, {
@@ -180,7 +181,7 @@ export const scheduleMessage = async (
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ classes, message, scheduleDate }),
+      body: JSON.stringify({ classes, message, scheduleDate, schedulerUserId }),
     });
 
     if (!response.ok) {

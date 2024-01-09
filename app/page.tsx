@@ -76,7 +76,7 @@ export default function Home() {
                 </Text>
               </HStack>
             </Box>
-            <Box fontSize="xl" fontWeight="bold" py="4">
+            <Box mt="4">
               <Box
                 width="full"
                 bgColor="gray.200"
@@ -85,15 +85,18 @@ export default function Home() {
                 alignItems="center"
               >
                 <Icon fontSize="xl" as={LuCalendarClock} mr={3} />
-                <Text fontWeight="medium">Scheduled Messages</Text>
+                <Text fontWeight="medium" fontSize="xl">
+                  Scheduled Messages
+                </Text>
               </Box>
             </Box>
-            <Box display="flex" flexDirection="column" gap="2">
+            <Box display="flex" flexDirection="column" gap="1" mt="1">
               {scheduledMessages.map((x, index) => (
                 <Card
+                  borderRadius="0"
                   key={index}
                   _hover={{
-                    background: "gray.100", // Change the background color to a darker shade on hover
+                    background: "#f7f7f7", // Change the background color to a darker shade on hover
                   }}
                 >
                   <CardHeader fontWeight="bold" fontSize="sm">
@@ -101,7 +104,6 @@ export default function Home() {
                     <Text display="inline" color="red">
                       {convertAndAdjustDate(x.time)}
                     </Text>
-                    <Text display="inline"> | </Text>
                     <CloseButton
                       size="md"
                       position="absolute"
