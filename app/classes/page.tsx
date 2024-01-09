@@ -147,7 +147,7 @@ export default function Classes() {
           <div className="grid-cols-3 grid gap-7 mt-10">
             {loading ? (
               Array.from({ length: 6 }).map((_, index) => (
-                <Box key={index} maxW="sm">
+                <Box key={index} maxW="full">
                   <Skeleton height="100px" width="100%" />
                   <Skeleton height="20px" width="100%" mt="2" />
                   <Skeleton height="20px" width="100%" mt="2" />

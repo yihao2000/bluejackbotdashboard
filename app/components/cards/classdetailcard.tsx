@@ -61,6 +61,7 @@ export default function ClassDetailCard(props: Data) {
   }
 
   const getSpecifiedClassBot = (classID: string) => {
+    setClassBotResult(null);
     getClassBot(classID)
       .then((res) => {
         console.log(res);
@@ -81,8 +82,8 @@ export default function ClassDetailCard(props: Data) {
   };
 
   const handleClassButtonClick = (classID: string) => {
-    openDetailModal();
     getSpecifiedClassBot(classID);
+    openDetailModal();
   };
 
   return (

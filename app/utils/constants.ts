@@ -1,6 +1,6 @@
 import { Item } from "../interfaces/interfaces";
 
-export const API_URL = "http://localhost:3001";
+export const API_URL = "http://bluejackbot.jex.ink:3001";
 
 export const CLASSES_DETAIL_QUERY = `${API_URL}/classes/query/classesdetail`;
 export const LINKED_CLASSES_QUERY = `${API_URL}/classes/query/linkedclasses`;
@@ -156,7 +156,8 @@ export const announceMessage = async (classes: string[], message: string) => {
 export const scheduleMessage = async (
   classes: string[],
   message: string,
-  scheduleDate: string
+  scheduleDate: string,
+  schedulerUserId: string,
 ) => {
   try {
     const response = await fetch(SCHEDULE_MESSAGE, {
@@ -164,7 +165,7 @@ export const scheduleMessage = async (
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ classes, message, scheduleDate }),
+      body: JSON.stringify({ classes, message, scheduleDate, schedulerUserId }),
     });
 
     if (!response.ok) {

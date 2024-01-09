@@ -82,6 +82,7 @@ const ClassDetailModal: React.FC<ClassDetailModalProps> = ({
         isClosable: true,
       });
     } else {
+      onClose();
       refreshPage();
     }
   };
@@ -92,7 +93,6 @@ const ClassDetailModal: React.FC<ClassDetailModalProps> = ({
       const { classID, linkCode } = linkFormData.params;
       linkClass(classID, linkCode)
         .then((res) => {
-          console.log(res);
           showResult(res);
         })
         .finally(() => {
