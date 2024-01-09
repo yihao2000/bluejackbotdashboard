@@ -107,7 +107,9 @@ export default function ChannelDetailCard(props: Data) {
     openDetailModal();
   };
 
-  const handleDeleteChannelClick = () => {};
+  const handleDeleteChannelClick = () => {
+    
+  };
 
   return (
     <Card className="hover:cursor-pointer hover:scale-105 transition">
