@@ -1,6 +1,7 @@
 import { Item } from "../interfaces/interfaces";
 
-export const API_URL = "http://bluejackbot.jex.ink:3001";
+// export const API_URL = "http://bluejackbot.jex.ink:3001";
+export const API_URL = "http://localhost:3001";
 
 export const CLASSES_DETAIL_QUERY = `${API_URL}/classes/query/classesdetail`;
 export const LINKED_CLASSES_QUERY = `${API_URL}/classes/query/linkedclasses`;
@@ -9,6 +10,7 @@ export const ALL_SEMESTERS_QUERY = `${API_URL}/semesters/getsemesters`;
 export const ACTIVE_SEMESTER_QUERY = `${API_URL}/semesters/getactivesemester`;
 export const ASSISTANT_CLASSES_QUERY = `${API_URL}/classes/getassistantclasses`;
 export const USER_LOGIN_QUERY = `${API_URL}/users/login`;
+export const GET_SALT_QUERY = `${API_URL}/users/get-salt`;
 export const ASSISTANT_LINKED_CLASSES_QUERY = `${API_URL}/classes/getlinkedclasses`;
 export const CLASS_BOT_QUERY = `${API_URL}/classes/getclassbot`;
 export const LINK_CLASS = `${API_URL}/classes/linkclass`;
@@ -26,6 +28,20 @@ export const REMOVE_SCHEDULED_MESSAGE = `${API_URL}/messages/removescheduledmess
 export const GET_ACTIVE_SEMESTER_COURSE_OUTLINE = `${API_URL}/semesters/getactivesemestercourseoutlines`
 export const GET_CLASS_TRANSACTION_BY_COURSE_OUTLINE_AND_SEMESTER = `${API_URL}/classes/getclasstransactionbycourseoutlineandsemester`
 export const ADD_CHANNEL_SUBSCRIBERS = `${API_URL}/channels/addchannelsubscribers`
+
+export const getSalt = async (username: string) => {
+  const res = await fetch(GET_SALT_QUERY, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ username }),
+  });
+  if (!res.ok) {
+    throw new Error("Error fetching salt");
+  }
+  return await res.json();
+}
 
 export const queryLinkedClasses = async () => {
   return fetch(LINKED_CLASSES_QUERY).then((response) => {

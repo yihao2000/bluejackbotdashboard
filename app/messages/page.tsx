@@ -24,17 +24,21 @@ type Props = {};
 const data: Array<MessageTemplate> = [
   {
     name: "hai",
+    owner_id: "1",
     category: "test",
     data_map: new Map<string, string>([["test", "BB01"]]),
-    content: "uga buga",
+    raw_content: "uga buga",
     id: "123",
+    is_shared: false,
   },
   {
     name: "123123",
     category: "123123123",
+    owner_id: "1",
     data_map: new Map<string, string>([["test", "BB01"]]),
-    content: "uga buga",
+    raw_content: "uga buga",
     id: "4444",
+    is_shared: false,
   },
 ];
 

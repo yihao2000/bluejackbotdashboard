@@ -1,3 +1,5 @@
+import { User } from "next-auth";
+
 export interface ClassLineGroup {
   id: string;
   class_line_group_id: string;
@@ -69,8 +71,10 @@ export interface RoomClass {
 
 export interface MessageTemplate {
   id: string;
+  owner_id: string;
   name: string;
-  content: string;
+  raw_content: string;
+  is_shared: boolean,
   data_map: Map<string, any>;
   category: string;
 }
