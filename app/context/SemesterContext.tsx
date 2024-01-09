@@ -10,6 +10,7 @@ import {
 import { Semester } from "../interfaces/interfaces";
 import { queryActiveSemester, queryAllSemesters } from "../utils/constants";
 import { transformSemesterApiResponse } from "../utils/formatter";
+import { Box, Spinner } from "@chakra-ui/react";
 
 interface SemesterContextType {
   semesters: Semester[] | undefined;
@@ -60,7 +61,20 @@ export function SemesterProvider({ children }: { children: ReactNode }) {
   }, []);
 
   return loading ? (
-    <div>Loading...</div>
+    <Box
+      display="flex"
+      alignItems="center"
+      justifyContent="center"
+      position="fixed"
+      top="0"
+      left="0"
+      width="100%"
+      height="100%"
+      backgroundColor="rgba(0, 0, 0, 0.1)"
+      zIndex="9999"
+    >
+      <Spinner size="xl" color="white" />
+    </Box>
   ) : (
     <SemesterContext.Provider
       value={{

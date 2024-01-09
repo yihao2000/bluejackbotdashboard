@@ -18,6 +18,7 @@ import {
   TagCloseButton,
   useTab,
   IconButton,
+  Skeleton,
 } from "@chakra-ui/react";
 import { IoMdArrowBack } from "react-icons/io";
 
@@ -220,7 +221,6 @@ const ChannelDetailModal: React.FC<ChannelDetailModalProps> = ({
       )
         .then((x) => {
           const filteredClasses = filterClassesById(x, groupedClasses);
-          console.log(filteredClasses);
           setCourseClasses(filteredClasses);
         })
         .finally(() => {
@@ -230,6 +230,7 @@ const ChannelDetailModal: React.FC<ChannelDetailModalProps> = ({
   };
 
   const handleCourseOutlineChange = (x: string) => {
+    setCourseClasses(null);
     setselectedCourseOutlineName(x);
 
     //Get the id of the selected course outline
@@ -250,8 +251,6 @@ const ChannelDetailModal: React.FC<ChannelDetailModalProps> = ({
   };
 
   const handleAddSelectedClassesClick = () => {
-    console.log("Keclick");
-
     // Extracting only the 'value' property from each item in selectedClassess
     const extractedClassesID = selectedClassess.map((item) => item.value);
 
@@ -264,14 +263,25 @@ const ChannelDetailModal: React.FC<ChannelDetailModalProps> = ({
 
     addChannelSubscribers(channel.channel_id, extractedClassesID)
       .then((response) => {
-        console.log(response);
         refreshPage();
         handleModalClose();
+
+        toast({
+          title: "Success",
+          description: "Successfully add selected class(es) to channel.",
+          status: "success",
+          duration: 5000,
+          isClosable: true,
+        });
       })
       .catch((error) => {
-        console.error("Error adding channel subscribers:", error);
-        // Handle the error appropriately
-        // You may want to show a toast or update the UI to inform the user
+        toast({
+          title: "Error",
+          description: "Unable to add selected class(es) to channel.",
+          status: "error",
+          duration: 5000,
+          isClosable: true,
+        });
       })
       .finally(() => {
         clearData();
@@ -342,28 +352,40 @@ const ChannelDetailModal: React.FC<ChannelDetailModalProps> = ({
           ) : (
             <Box>
               <AutoComplete
+                maxSuggestions={5}
                 onChange={(x: string) => handleCourseOutlineChange(x)}
               >
-                <AutoCompleteInput variant="outline" />
+                <AutoCompleteInput
+                  variant="outline"
+                  placeholder="Course Outline (Ex. COMP6047001)"
+                />
                 <AutoCompleteList>
                   {courseOutlines.map((x) => (
                     <AutoCompleteItem key={`option-${x.id}`} value={x.name}>
                       {x.name}
+                      {console.log("Kererender")}
                     </AutoCompleteItem>
                   ))}
                 </AutoCompleteList>
               </AutoComplete>
             </Box>
           )}
+          {classLoading && (
+            <Box mt="4">
+              <Skeleton height="10"></Skeleton>
+            </Box>
+          )}
           {addMoreClass && courseClasses != null && (
-            <CUIAutoComplete
-              placeholder="Search classes"
-              items={courseClasses}
-              selectedItems={selectedClassess}
-              onSelectedItemsChange={(changes: any) =>
-                handleSelectedClassesChange(changes.selectedItems)
-              }
-            />
+            <Box>
+              <CUIAutoComplete
+                placeholder="Search classes"
+                items={courseClasses}
+                selectedItems={selectedClassess}
+                onSelectedItemsChange={(changes: any) =>
+                  handleSelectedClassesChange(changes.selectedItems)
+                }
+              />
+            </Box>
           )}
         </ModalBody>
 

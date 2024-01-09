@@ -38,6 +38,7 @@ export default function Classes() {
   >(null);
   const [refresh, setRefresh] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [originalClasses, setOriginalClasses] = useState<Array<Class>>([]);
 
   const toast = useToast();
   const session = useSession();
@@ -49,15 +50,11 @@ export default function Classes() {
 
   function checkClassIdLinked(id: string) {
     const isLinked = !!classLineGroups?.some((clg) => clg.class_id === id);
-
     return isLinked;
   }
 
   const fetchData = async () => {
     try {
-      // console.log(session.data?.user);
-      // console.log(selectedSemester);
-
       if (session.data?.user.username != null && selectedSemester != null) {
         console.log("Ga null");
         const classesResponse = await queryAssistantClasses(
@@ -68,6 +65,7 @@ export default function Classes() {
         if (classesResponse.response != "") {
           const transformedData = transformClassApiReponse(classesResponse);
           setClasses(transformedData);
+          setOriginalClasses(transformedData);
 
           if (transformedData.length > 0) {
             const classIds = transformedData.map((c: Class) => c.id);
@@ -78,6 +76,7 @@ export default function Classes() {
           }
         } else {
           setClasses([]);
+          setOriginalClasses([]);
         }
       }
     } catch (error) {
@@ -98,6 +97,26 @@ export default function Classes() {
     fetchData();
   }, [refresh, selectedSemester]);
 
+  useEffect(() => {
+    // Filter classes based on the search input
+    const filteredClasses = originalClasses.filter((cls: Class) =>
+      cls.subject.toLowerCase().includes(value.toLowerCase())
+    );
+
+    // Apply additional filters based on the selected filter
+    const filteredAndLinkedClasses = filteredClasses.filter((cls: Class) => {
+      if (selectedFilter === "all") {
+        return true; // Include all classes
+      } else if (selectedFilter === "linked") {
+        return checkClassIdLinked(cls.id); // Include only linked classes
+      } else if (selectedFilter === "unlinked") {
+        return !checkClassIdLinked(cls.id); // Include only unlinked classes
+      }
+      return false;
+    });
+
+    setClasses(filteredAndLinkedClasses);
+  }, [value, selectedFilter, originalClasses]);
   return (
     <>
       <Nav>

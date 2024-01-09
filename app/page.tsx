@@ -26,6 +26,7 @@ import { queryScheduledMessages } from "./utils/constants";
 import { ScheduledMessage } from "./interfaces/interfaces";
 import { convertAndAdjustDate } from "./utils/formatter";
 import { ConfirmationModal } from "./components/modal/confirmationmodal";
+import { LuCalendarClock } from "react-icons/lu";
 
 export default function Home() {
   const session = useSession();
@@ -59,9 +60,8 @@ export default function Home() {
   }, [refresh]);
 
   useEffect(() => {
-    console.log(session)
-  }, [session])
-  
+    console.log(session);
+  }, [session]);
 
   return (
     <>
@@ -77,7 +77,16 @@ export default function Home() {
               </HStack>
             </Box>
             <Box fontSize="xl" fontWeight="bold" py="4">
-              Scheduled Messages
+              <Box
+                width="full"
+                bgColor="gray.200"
+                p="3"
+                display="flex"
+                alignItems="center"
+              >
+                <Icon fontSize="xl" as={LuCalendarClock} mr={3} />
+                <Text fontWeight="medium">Scheduled Messages</Text>
+              </Box>
             </Box>
             <Box display="flex" flexDirection="column" gap="2">
               {scheduledMessages.map((x, index) => (
