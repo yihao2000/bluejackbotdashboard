@@ -19,8 +19,10 @@ interface ConfirmationProps {
   onOpen: () => void;
   onClose: () => void;
   title: string;
-  content: ScheduledMessage | undefined;
+  action: () => Promise<void>;
   description: string;
+  successMessage: string;
+  errorMessage: string;
   refreshPage: () => void;
 }
 
@@ -29,29 +31,35 @@ export const ConfirmationModal: React.FC<ConfirmationProps> = ({
   onOpen,
   onClose,
   title,
-  content,
+  action,
   description,
+  successMessage,
+  errorMessage,
   refreshPage,
 }) => {
   const toast = useToast();
   const handleDeleteScheduledMessage = () => {
-    if (content?.id) {
-      removeScheduledMessage(content?.id)
-        .then((x) => {
-          toast({
-            title: "Success",
-            description: "Scheduled message successfuly removed !",
-            status: "success",
-            duration: 5000,
-            isClosable: true,
-          });
-          onClose();
-          refreshPage();
-        })
-        .catch((err) => {
-          console.log(err);
+    action()
+      .then(() => {
+        toast({
+          title: "Success",
+          description: successMessage,
+          status: "success",
+          duration: 5000,
+          isClosable: true,
         });
-    }
+        onClose();
+        refreshPage();
+      })
+      .catch((err) => {
+        toast({
+          title: "Error",
+          description: errorMessage,
+          status: "error",
+          duration: 5000,
+          isClosable: true,
+        });
+      });
   };
 
   const handleConfirmClick = () => {

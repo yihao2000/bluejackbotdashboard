@@ -22,7 +22,10 @@ import { useSession } from "next-auth/react";
 import { redirect } from "next/navigation";
 import { useSemester } from "./context/SemesterContext";
 import { FiHome } from "react-icons/fi";
-import { queryScheduledMessages } from "./utils/constants";
+import {
+  queryScheduledMessages,
+  removeScheduledMessage,
+} from "./utils/constants";
 import { ScheduledMessage } from "./interfaces/interfaces";
 import { convertAndAdjustDate } from "./utils/formatter";
 import { ConfirmationModal } from "./components/modal/confirmationmodal";
@@ -53,6 +56,27 @@ export default function Home() {
     setScheduledMessage(data);
   };
 
+  const handleDeleteScheduledMessage = (): Promise<void> => {
+    return new Promise<void>((resolve, reject) => {
+      if (scheduledMessage) {
+        if (scheduledMessage.id) {
+          removeScheduledMessage(scheduledMessage.id)
+            .then(() => {
+              resolve();
+            })
+            .catch((err) => {
+              console.error(err);
+              reject(err);
+            });
+        } else {
+          reject(new Error("No content ID available"));
+        }
+      } else {
+        reject(new Error("No scheduled message available"));
+      }
+    });
+  };
+
   useEffect(() => {
     queryScheduledMessages().then((x) => {
       setScheduledMessages(x);
@@ -78,6 +102,7 @@ export default function Home() {
             </Box>
             <Box mt="4">
               <Box
+                borderRadius="xl"
                 width="full"
                 bgColor="gray.200"
                 p="3"
@@ -93,7 +118,7 @@ export default function Home() {
             <Box display="flex" flexDirection="column" gap="1" mt="1">
               {scheduledMessages.map((x, index) => (
                 <Card
-                  borderRadius="0"
+                  borderRadius="xl"
                   key={index}
                   _hover={{
                     background: "#f7f7f7", // Change the background color to a darker shade on hover
@@ -124,12 +149,15 @@ export default function Home() {
             </Box>
           </Box>
         </main>
+
         <ConfirmationModal
           {...confirmationModalDisclosure}
           title="Delete Confirmation"
           description="Are you sure you want to delete selected scheduled message ?"
-          content={scheduledMessage}
+          action={handleDeleteScheduledMessage}
           refreshPage={refreshPage}
+          successMessage="Scheduled message successfuly removed !"
+          errorMessage="Failed to schedule message !"
         />
       </Nav>
     </>

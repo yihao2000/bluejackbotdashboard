@@ -28,6 +28,8 @@ export const REMOVE_SCHEDULED_MESSAGE = `${API_URL}/messages/removescheduledmess
 export const GET_ACTIVE_SEMESTER_COURSE_OUTLINE = `${API_URL}/semesters/getactivesemestercourseoutlines`
 export const GET_CLASS_TRANSACTION_BY_COURSE_OUTLINE_AND_SEMESTER = `${API_URL}/classes/getclasstransactionbycourseoutlineandsemester`
 export const ADD_CHANNEL_SUBSCRIBERS = `${API_URL}/channels/addchannelsubscribers`
+export const DELETE_CHANNEL = `${API_URL}/channels/deletechannel`
+
 
 export const getSalt = async (username: string) => {
   const res = await fetch(GET_SALT_QUERY, {
@@ -174,6 +176,7 @@ export const scheduleMessage = async (
   message: string,
   scheduleDate: string,
   schedulerUserId: string,
+  repeatOption: string,
 ) => {
   try {
     const response = await fetch(SCHEDULE_MESSAGE, {
@@ -181,7 +184,7 @@ export const scheduleMessage = async (
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ classes, message, scheduleDate, schedulerUserId }),
+      body: JSON.stringify({ classes, message, scheduleDate, schedulerUserId, repeatOption }),
     });
 
     if (!response.ok) {
@@ -323,6 +326,7 @@ export const removeStudentClass = async (
   }
   return await response.json();
 };
+
 
 export const queryScheduledMessages = async () => {
   const response = await fetch(SCHEDULED_MESSAGES_QUERY, {
@@ -469,4 +473,21 @@ export const addChannelSubscribers = async (
     // Re-throw the error to propagate it
     throw error;
   }
+};
+
+export const removeChannel = async (
+  channelID: String,
+) => {
+  const response = await fetch(DELETE_CHANNEL, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ channelID }),
+  });
+
+  if (!response.ok) {
+    throw new Error("Error fetching data");
+  }
+  return await response.json();
 };

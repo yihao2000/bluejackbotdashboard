@@ -149,7 +149,7 @@ const ChannelDetailModal: React.FC<ChannelDetailModalProps> = ({
       console.log(roomId);
       setLoading(true);
       removeStudentClass(channel.channel_id, roomId)
-        .then((x) => {
+        .then(() => {
           toast({
             title: "Success",
             description: "Successfully removed class from channel.",
@@ -158,6 +158,7 @@ const ChannelDetailModal: React.FC<ChannelDetailModalProps> = ({
             isClosable: true,
           });
           refreshPage();
+          onClose();
         })
         .catch((err) => {
           toast({
