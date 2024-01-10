@@ -79,6 +79,16 @@ export interface MessageTemplate {
   category: string;
 }
 
+export interface AutoResponse {
+  id: string
+  name: string
+  trigger_type: string
+  trigger_words: Array<string>
+  trigger_recipients: string
+  response_message: string
+  is_enabled: boolean
+}
+
 export interface ScheduledMessage {
   id: string;
   recipients_string: string;

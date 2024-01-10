@@ -24,10 +24,11 @@ export const REMOVE_CHANNEL_CLASS = `${API_URL}/channels/removechannelsubscriber
 export const SCHEDULED_MESSAGES_QUERY = `${API_URL}/messages/getscheduledmessages`;
 export const CREATE_MESSAGE_TEMPLATE = `${API_URL}/message_templates/createmessagetemplate`;
 export const GET_MESSAGE_TEMPLATES = `${API_URL}/message_templates/getmessagetemplates`;
-export const REMOVE_SCHEDULED_MESSAGE = `${API_URL}/messages/removescheduledmessage`
-export const GET_ACTIVE_SEMESTER_COURSE_OUTLINE = `${API_URL}/semesters/getactivesemestercourseoutlines`
-export const GET_CLASS_TRANSACTION_BY_COURSE_OUTLINE_AND_SEMESTER = `${API_URL}/classes/getclasstransactionbycourseoutlineandsemester`
-export const ADD_CHANNEL_SUBSCRIBERS = `${API_URL}/channels/addchannelsubscribers`
+export const GET_AUTO_RESPONSES = `${API_URL}/message_templates/getAutoResponses`;
+export const REMOVE_SCHEDULED_MESSAGE = `${API_URL}/messages/removescheduledmessage`;
+export const GET_ACTIVE_SEMESTER_COURSE_OUTLINE = `${API_URL}/semesters/getactivesemestercourseoutlines`;
+export const GET_CLASS_TRANSACTION_BY_COURSE_OUTLINE_AND_SEMESTER = `${API_URL}/classes/getclasstransactionbycourseoutlineandsemester`;
+export const ADD_CHANNEL_SUBSCRIBERS = `${API_URL}/channels/addchannelsubscribers`;
 
 export const getSalt = async (username: string) => {
   const res = await fetch(GET_SALT_QUERY, {
@@ -41,7 +42,7 @@ export const getSalt = async (username: string) => {
     throw new Error("Error fetching salt");
   }
   return await res.json();
-}
+};
 
 export const queryLinkedClasses = async () => {
   return fetch(LINKED_CLASSES_QUERY).then((response) => {
@@ -173,7 +174,7 @@ export const scheduleMessage = async (
   classes: string[],
   message: string,
   scheduleDate: string,
-  schedulerUserId: string,
+  schedulerUserId: string
 ) => {
   try {
     const response = await fetch(SCHEDULE_MESSAGE, {
@@ -334,11 +335,11 @@ export const queryScheduledMessages = async () => {
 
   if (!response.ok) {
     throw new Error("Error fetching data");
-  } 
+  }
   return await response.json();
-} 
+};
 
-export const removeScheduledMessage = async(id: String) => {
+export const removeScheduledMessage = async (id: String) => {
   const response = await fetch(REMOVE_SCHEDULED_MESSAGE, {
     method: "POST",
     headers: {
@@ -352,8 +353,21 @@ export const removeScheduledMessage = async(id: String) => {
   }
   return await response.json();
 };
+
+export const getAutoResponses = async () => {
+  const response = await fetch(GET_AUTO_RESPONSES, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
+  if (!response.ok) {
+    throw new Error("Error fetching data");
+  }
+  return await response.json();
+};
+
 export const getMessageTemplates = async () => {
-  
   const response = await fetch(GET_MESSAGE_TEMPLATES, {
     method: "GET",
     headers: {
@@ -363,9 +377,9 @@ export const getMessageTemplates = async () => {
 
   if (!response.ok) {
     throw new Error("Error fetching data");
-  } 
+  }
   return await response.json();
-} 
+};
 
 export const createMessageTemplate = async (
   name: string,
@@ -373,23 +387,22 @@ export const createMessageTemplate = async (
   data_map: Map<string, string>,
   is_shared: boolean,
   category: string,
-  owner_id: string,
+  owner_id: string
 ) => {
-
   const obj = Object.fromEntries(data_map);
   const response = await fetch(CREATE_MESSAGE_TEMPLATE, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
     },
-    body: JSON.stringify({ 
+    body: JSON.stringify({
       name: name,
       content: content,
       data_map: obj,
       is_shared: is_shared,
       category: category,
       owner_id: owner_id,
-     }),
+    }),
   });
 
   if (!response.ok) {
@@ -398,7 +411,10 @@ export const createMessageTemplate = async (
   return await response.json();
 };
 
-export const getActiveSemesterCourseOutlines = async (messierID: string, semesterID: string) => {
+export const getActiveSemesterCourseOutlines = async (
+  messierID: string,
+  semesterID: string
+) => {
   try {
     const response = await fetch(GET_ACTIVE_SEMESTER_COURSE_OUTLINE, {
       method: "POST",
@@ -421,16 +437,21 @@ export const getActiveSemesterCourseOutlines = async (messierID: string, semeste
   }
 };
 
-
-export const getClassTransactionByCourseOutlineAndSemester = async (semesterID: string, courseOutlineID: string) => {
+export const getClassTransactionByCourseOutlineAndSemester = async (
+  semesterID: string,
+  courseOutlineID: string
+) => {
   try {
-    const response = await fetch(GET_CLASS_TRANSACTION_BY_COURSE_OUTLINE_AND_SEMESTER, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ semesterID, courseOutlineID }),
-    });
+    const response = await fetch(
+      GET_CLASS_TRANSACTION_BY_COURSE_OUTLINE_AND_SEMESTER,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ semesterID, courseOutlineID }),
+      }
+    );
 
     if (!response.ok) {
       const errorData = await response.json();

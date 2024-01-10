@@ -68,10 +68,11 @@ interface SidebarProps extends BoxProps {
 }
 
 const LinkItems: Array<LinkItemProps> = [
-  { name: "Home", icon: FiHome, href: "/" }, // Example href
-  { name: "Classes", icon: FiTrendingUp, href: "/classes" }, // Example href
-  { name: "Services", icon: FiCompass, href: "/services" }, // Example href
-  { name: "Messages", icon: AiOutlineMessage, href: "/messages" }, // Example href
+  { name: "Home", icon: FiHome, href: "/" },
+  { name: "Classes", icon: FiTrendingUp, href: "/classes" },
+  { name: "Services", icon: FiCompass, href: "/services" },
+  { name: "Messages", icon: AiOutlineMessage, href: "/messages" },
+  { name: "Auto Responder", icon: AiOutlineMessage, href: "/responder" },
   { name: "Channels", icon: GoBroadcast, href: "/channels" },
   { name: "Actions", icon: AiOutlineSetting, href: "/actions" },
 ];
