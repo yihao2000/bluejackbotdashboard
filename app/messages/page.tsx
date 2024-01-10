@@ -1,5 +1,11 @@
 "use client";
-import React, { ChangeEvent, ReactNode, SyntheticEvent, useEffect, useState } from "react";
+import React, {
+  ChangeEvent,
+  ReactNode,
+  SyntheticEvent,
+  useEffect,
+  useState,
+} from "react";
 import Nav from "@/app/components/navbar";
 import {
   Box,
@@ -58,14 +64,14 @@ const Page = (props: Props) => {
     setLoading(true);
     try {
       const res = await getMessageTemplates();
-      const arr : Array<MessageTemplate> = []
-      res.forEach((r: any)=> {
+      const arr: Array<MessageTemplate> = [];
+      res.forEach((r: any) => {
         if (r.data_map) {
           const map = new Map(Object.entries(r.data_map));
           arr.push({
             ...r,
-            data_map: map
-          })
+            data_map: map,
+          });
         } else arr.push(r);
       });
       setTemplates(arr);
@@ -77,8 +83,8 @@ const Page = (props: Props) => {
         isClosable: true,
       });
     }
-    setLoading(false)
-  }
+    setLoading(false);
+  };
 
   const [modal, setModal] = useState<ModalState>({
     type: "detail",
@@ -118,9 +124,8 @@ const Page = (props: Props) => {
   };
 
   useEffect(() => {
-    fetchData()
-  }, [])
-  
+    fetchData();
+  }, []);
 
   return (
     <>
@@ -152,11 +157,7 @@ const Page = (props: Props) => {
             </Select>
           </Box>
           <Box className="py-4 px-0">
-            <Button
-              className="bg-blue-400 text-white hover:bg-blue-600"
-              rounded={"sm"}
-              onClick={() => openAdd()}
-            >
+            <Button onClick={() => openAdd()} colorScheme="twitter">
               Add
             </Button>
           </Box>

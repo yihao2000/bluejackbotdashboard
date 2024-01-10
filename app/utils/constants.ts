@@ -495,3 +495,20 @@ export const addChannelSubscribers = async (
     throw error;
   }
 };
+
+export const removeChannel = async (
+  channelID: String,
+) => {
+  const response = await fetch(DELETE_CHANNEL, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ channelID }),
+  });
+
+  if (!response.ok) {
+    throw new Error("Error fetching data");
+  }
+  return await response.json();
+};
