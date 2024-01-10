@@ -10,11 +10,14 @@ import Nav from "@/app/components/navbar";
 import {
   Box,
   Button,
+  HStack,
+  Icon,
   Input,
   InputGroup,
   InputRightElement,
   Select,
   Skeleton,
+  Text,
   useToast,
 } from "@chakra-ui/react";
 import { AiOutlineSearch } from "react-icons/ai";
@@ -24,6 +27,7 @@ import MessageTemplateCard from "../components/cards/messagetemplatecard";
 import MessageDetail from "../components/modal/message/messagedetail";
 import CreateMessageTemplate from "../components/modal/message/CreateMessageTemplate";
 import { getMessageTemplates } from "../utils/constants";
+import { AiOutlineMessage, AiOutlineSetting } from "react-icons/ai";
 
 type Props = {};
 
@@ -131,7 +135,19 @@ const Page = (props: Props) => {
     <>
       <Nav>
         <main className="max-w-full">
-          <Box className="flex gap-3">
+          <Box display="flex" justifyContent="space-between">
+            <HStack>
+              <Icon fontSize="4xl" as={AiOutlineMessage} mr={4} />
+              <Text fontSize="3xl" fontWeight="bold">
+                Messages
+              </Text>
+            </HStack>
+
+            <Button onClick={() => openAdd()} colorScheme="twitter">
+              Create New Message
+            </Button>
+          </Box>
+          <Box className="flex gap-3 mt-6">
             <InputGroup>
               <InputRightElement>
                 <AiOutlineSearch />
@@ -156,12 +172,8 @@ const Page = (props: Props) => {
               <option value="unlinked">Private</option>
             </Select>
           </Box>
-          <Box className="py-4 px-0">
-            <Button onClick={() => openAdd()} colorScheme="twitter">
-              Add
-            </Button>
-          </Box>
-          <div className="grid-cols-3 grid gap-7 mt-10">
+          <Box className="py-4 px-0"></Box>
+          <div className="grid-cols-3 grid gap-7">
             {loading || !templates ? (
               Array.from({ length: 6 }).map((_, index) => (
                 <Box key={index} maxW="sm">
