@@ -50,14 +50,20 @@ const AutoResponseCard = (props: Props) => {
             </Box>
         </Box>
       </CardBody>
-      {/* <CardFooter>
+      <CardFooter gap={"2rem"}>
         <Button
           colorScheme="blue"
-          onClick={() => props.openDetail(props.data.id)}
+          onClick={() => {}}
         >
-          Details
+          Edit
         </Button>
-      </CardFooter> */}
+        <Button
+          colorScheme="red"
+          onClick={() => {}}
+        >
+          Delete
+        </Button>
+      </CardFooter>
     </Card>
   );
 };

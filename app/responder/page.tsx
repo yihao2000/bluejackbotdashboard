@@ -18,12 +18,21 @@ import {
 import { AiOutlineSearch } from "react-icons/ai";
 import { BsFilter } from "react-icons/bs";
 import AutoResponseCard from "../components/cards/autoresponsecard";
+import CreateAutoRespond from "../components/modal/createautorespond";
 
 type Props = {};
+
+type ModalState = {
+  type: string;
+  show: boolean;
+};
 
 const Page = (props: Props) => {
   const [loading, setLoading] = useState(false);
   const [responses, setResponses] = useState<Array<AutoResponse>>([]);
+  const [search, setSearch] = useState("")
+  const [filter, setFilter] = useState("")
+  const [modal, setModal] = useState<ModalState>()
   const toast = useToast();
 
   const fetchData = async () => {
@@ -50,6 +59,13 @@ const Page = (props: Props) => {
     setLoading(false);
   };
 
+  const openAdd = () => {
+    setModal({
+      type: "add",
+      show: true
+    })
+  }
+
   useEffect(() => {
     fetchData();
   }, []);
@@ -61,7 +77,7 @@ const Page = (props: Props) => {
           <Text fontSize={"2xl"} fontWeight={"semibold"} noOfLines={[1, 3]}>
             Auto Responder
           </Text>
-          {/* <Box className="flex gap-3">
+          <Box className="flex gap-3">
           <InputGroup>
             <InputRightElement>
               <AiOutlineSearch />
@@ -69,12 +85,14 @@ const Page = (props: Props) => {
             <Input
               backgroundColor={"white"}
               value={search}
-              onChange={handleChange}
+              onChange={(e) => {
+                setSearch(e.target.value);
+              }}
               placeholder="Search..."
               size="md"
             />
           </InputGroup>
-          <Select
+          {/* <Select
             backgroundColor={"white"}
             width={"36"}
             defaultValue="all"
@@ -84,9 +102,9 @@ const Page = (props: Props) => {
             <option value="all">All</option>
             <option value="linked">Global</option>
             <option value="unlinked">Private</option>
-          </Select>
-        </Box> */}
-          {/* <Box className="py-4 px-0">
+          </Select> */}
+        </Box>
+          <Box className="py-4 px-0">
           <Button
             className="bg-blue-400 text-white hover:bg-blue-600"
             rounded={"sm"}
@@ -94,7 +112,7 @@ const Page = (props: Props) => {
           >
             Add
           </Button>
-        </Box> */}
+        </Box>
           <div className="grid-cols-3 grid gap-7 mt-4">
             {loading || !responses ? (
               Array.from({ length: 6 }).map((_, index) => (
@@ -120,6 +138,12 @@ const Page = (props: Props) => {
           </div>
         </main>
       </Nav>
+      {modal?.type === "add" ? (
+        <CreateAutoRespond
+          isOpen={modal?.show}
+          onClose={() => {setModal(undefined)}}
+        />
+      ) : null}
     </>
   );
 };
