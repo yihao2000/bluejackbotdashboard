@@ -63,6 +63,47 @@ export interface Channel {
   channel_subscribers: string[];
 }
 
+export interface Service {
+  service_id: string;
+  service_name: string;
+  is_enabled: number;
+  initial_state_id: string;
+}
+
+export interface ServiceState {
+  service_state_id: string;
+  service_state_name: string;
+  service_state_message: string;
+  service_state_type: string;
+  service_state_data_format: string;
+  service_state_data_store: string | undefined;
+  service_state_input_options: string;
+}
+
+export interface ServiceResponse {
+  service_response_id: string;
+  service_response_name: string;
+  service_response_condition_id: string;
+  service_response_condition_value: string;
+  service_response_type: string;
+  service_response_value: string;
+  service_response_state_id: string;
+}
+
+export interface ServiceCondition {
+  service_condition_id: string;
+  service_condition_name: string;
+  service_condition_type: string;
+  service_condition_value: string
+}
+
+export interface ServiceAPICall {
+  service_api_call_id: string;
+  api_endpoint: string;
+  http_method: string;
+  payload: string;
+}
+
 export interface RoomClass {
   id: String;
   class: String;

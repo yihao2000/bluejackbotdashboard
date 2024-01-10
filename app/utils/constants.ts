@@ -1,4 +1,4 @@
-import { Item } from "../interfaces/interfaces";
+import { Item, Service, ServiceAPICall, ServiceCondition, ServiceResponse, ServiceState } from "../interfaces/interfaces";
 
 // export const API_URL = "http://bluejackbot.jex.ink:3001";
 export const API_URL = "http://localhost:3001";
@@ -18,6 +18,25 @@ export const CHECK_CLASS_LINKED_QUERY = `${API_URL}/classes/checkclasslinked`;
 export const ANNOUNCE_MESSAGE = `${API_URL}/classes/announceclassesmessage`;
 export const SCHEDULE_MESSAGE = `${API_URL}/classes/scheduleclassesmessage`;
 export const CHANNELS_QUERY = `${API_URL}/channels/getchannels`;
+
+export const SERVICES_QUERY = `${API_URL}/services/getservices`;
+export const SERVICE_STATES_QUERY = `${API_URL}/services/getstates`;
+export const SERVICE_RESPONSES_QUERY = `${API_URL}/services/getresponses`;
+export const SERVICE_CONDITIONS_QUERY = `${API_URL}/services/getconditions`;
+export const SERVICE_APICALLS_QUERY = `${API_URL}/services/getapicalls`;
+
+export const CREATE_SERVICE = `${API_URL}/services/createservice`;
+export const CREATE_SERVICE_STATE = `${API_URL}/services/createservice`;
+export const CREATE_SERVICE_RESPONSE = `${API_URL}/services/createservice`;
+export const CREATE_SERVICE_CONDITION = `${API_URL}/services/createservice`;
+export const CREATE_SERVICE_APICALL = `${API_URL}/services/createservice`;
+
+export const UPDATE_SERVICE = `${API_URL}/services/createservice`;
+export const UPDATE_SERVICE_STATE = `${API_URL}/services/createservice`;
+export const UPDATE_SERVICE_RESPONSE = `${API_URL}/services/createservice`;
+export const UPDATE_SERVICE_CONDITION = `${API_URL}/services/createservice`;
+export const UPDATE_SERVICE_APICALL = `${API_URL}/services/createservice`;
+
 export const CREATE_CHANNEL = `${API_URL}/channels/createchannel`;
 export const GET_CLASS_QUERY = `${API_URL}/classes/getstudentclass`;
 export const REMOVE_CHANNEL_CLASS = `${API_URL}/channels/removechannelsubscribers`;
@@ -269,6 +288,76 @@ export const queryChannels = async () => {
   return await response.json();
 };
 
+export const queryServices = async () => {
+  const response = await fetch(SERVICES_QUERY, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error("Error fetching data");
+  }
+  return await response.json();
+};
+
+export const queryServiceStates = async () => {
+  const response = await fetch(SERVICE_STATES_QUERY, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error("Error fetching data");
+  }
+  return await response.json();
+};
+
+export const queryServiceResponses = async () => {
+  const response = await fetch(SERVICE_RESPONSES_QUERY, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error("Error fetching data");
+  }
+  return await response.json();
+};
+
+export const queryServiceConditions = async () => {
+  const response = await fetch(SERVICE_CONDITIONS_QUERY, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error("Error fetching data");
+  }
+  return await response.json();
+};
+
+export const queryServiceApiCalls = async () => {
+  const response = await fetch(SERVICE_APICALLS_QUERY, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error("Error fetching data");
+  }
+  return await response.json();
+};
+
 export const createChannel = async (
   channelName: String,
   channelDescription: String
@@ -291,6 +380,126 @@ export const createChannel = async (
   } catch (error) {
     console.error("API Error:", error);
     // Re-throw the error to propagate it
+    throw error;
+  }
+};
+
+export const createOrSaveService = async (serviceData : Service) => {
+  const endpoint = serviceData.service_id ? UPDATE_SERVICE : CREATE_SERVICE;
+
+  try {
+    const response = await fetch(endpoint, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(serviceData),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(`API request failed: ${errorData.message}`);
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error("API Error:", error);
+    throw error;
+  }
+};
+
+export const createOrSaveServiceState = async (stateData : ServiceState) => {
+  const endpoint = stateData.service_state_id ? UPDATE_SERVICE_STATE : CREATE_SERVICE_STATE;
+
+  try {
+    const response = await fetch(endpoint, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(stateData),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(`API request failed: ${errorData.message}`);
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error("API Error:", error);
+    throw error;
+  }
+};
+
+export const createOrSaveServiceResponse = async (responseData : ServiceResponse) => {
+  const endpoint = responseData.service_response_id ? UPDATE_SERVICE_RESPONSE: CREATE_SERVICE_RESPONSE;
+
+  try {
+    const response = await fetch(endpoint, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(responseData),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(`API request failed: ${errorData.message}`);
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error("API Error:", error);
+    throw error;
+  }
+};
+
+export const createOrSaveServiceCondition = async (conditionData : ServiceCondition) => {
+  const endpoint = conditionData.service_condition_id ? UPDATE_SERVICE_CONDITION : CREATE_SERVICE_CONDITION;
+
+  try {
+    const response = await fetch(endpoint, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(conditionData),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(`API request failed: ${errorData.message}`);
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error("API Error:", error);
+    throw error;
+  }
+};
+
+export const createOrSaveServiceApiCall = async (apiCallData : ServiceAPICall) => {
+  const endpoint = apiCallData.service_api_call_id ? UPDATE_SERVICE_APICALL : CREATE_SERVICE_APICALL;
+
+  try {
+    const response = await fetch(endpoint, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(apiCallData),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(`API request failed: ${errorData.message}`);
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error("API Error:", error);
     throw error;
   }
 };
