@@ -31,16 +31,28 @@ const MessageDetail = (props: Props) => {
           <Box display={"flex"} flexDirection={"column"}>
             <Box fontWeight={"semibold"}>Content</Box>
             <Box maxHeight={"20rem"} overflowY={"auto"} className="py-2 px-1">
-              {props.data.content} 
+              {props.data.raw_content}
             </Box>
           </Box>
 
-          <Box display={"flex"}>
-            <Box fontWeight={"semibold"}>Category :</Box>&nbsp;
-            <Text color={"green.400"} fontWeight={"bold"}>
-              {props.data.category}
-            </Text>
-          </Box>
+          {props.data.category ? (
+            <Box display={"flex"}>
+              <Box fontWeight={"semibold"}>Category :</Box>&nbsp;
+              <Text color={"green.400"} fontWeight={"bold"}>
+                {props.data.category}
+              </Text>
+            </Box>
+          ) : null}
+
+          {props.data.data_map.size > 0 ? (
+            <Box display={"flex"} flexDirection={"column"} width={"100%"}>
+              <Box fontWeight={"semibold"}>Data Map :</Box>
+              {Array.from(props.data.data_map.keys()).map((key, i) => (
+                <Text>{`${key} -> ${props.data?.data_map.get(key)}`}</Text>
+              ))}
+            </Box>
+          ) : null}
+          <Button colorScheme="blue">Use</Button>
         </>
       ) : (
         <Text>

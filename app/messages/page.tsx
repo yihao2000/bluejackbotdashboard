@@ -1,5 +1,5 @@
 "use client";
-import React, { ChangeEvent, ReactNode, SyntheticEvent, useState } from "react";
+import React, { ChangeEvent, ReactNode, SyntheticEvent, useEffect, useState } from "react";
 import Nav from "@/app/components/navbar";
 import {
   Box,
@@ -58,7 +58,18 @@ const Page = (props: Props) => {
     setLoading(true);
     try {
       const res = await getMessageTemplates();
-      setTemplates(res);
+      const arr : Array<MessageTemplate> = []
+      res.forEach((r: any)=> {
+        if (r.data_map) {
+          const map = new Map(Object.entries(r.data_map));
+          arr.push({
+            ...r,
+            data_map: map
+          })
+        } else arr.push(r);
+      });
+      setTemplates(arr);
+      // console.log(res)
     } catch (error) {
       toast({
         title: "Error! Cannot get template data!",
@@ -105,6 +116,11 @@ const Page = (props: Props) => {
       show: false,
     });
   };
+
+  useEffect(() => {
+    fetchData()
+  }, [])
+  
 
   return (
     <>
