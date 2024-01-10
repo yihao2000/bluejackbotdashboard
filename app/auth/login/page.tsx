@@ -16,6 +16,7 @@ import ParticlesBackground from "@/app/components/background/ParticlesBackground
 import { FaUser, FaLock } from "react-icons/fa";
 import { useRouter } from "next/navigation";
 import { signIn, useSession } from "next-auth/react";
+import { getSalt } from "@/app/utils/constants";
 
 function LoginBox() {
   const toast = useToast();
@@ -24,26 +25,35 @@ function LoginBox() {
 
   const [isError, setIsError] = useState("");
 
-  const logIn = async () => {
-    const result = await signIn("credentials", {
-      username: username,
-      password: password,
-      redirect: false,
-    });
-    // console.log(result)
-    if (result?.error == null) {
-      window.location.replace("/");
-    } else {
-      
-      setIsError(result.error);
-      // toast({
-      //   title: "Error",
-      //   description: result?.error,
-      //   status: "error",
-      //   duration: 5000,
-      //   isClosable: true,
-      // });
-    }
+  const logIn = () => {
+
+    getSalt(username).then(async (res) => {
+
+      const encPass = window.EncryptToBase64(
+        res.salt + username,
+        password
+      );
+      const result = await signIn("credentials", {
+        username: username,
+        password: encPass,
+        redirect: false,
+      });
+      // console.log(result)
+      if (result?.error == null) {
+        window.location.replace("/");
+      } else {
+        
+        setIsError(result.error);
+        // toast({
+        //   title: "Error",
+        //   description: result?.error,
+        //   status: "error",
+        //   duration: 5000,
+        //   isClosable: true,
+        // });
+      }
+    })
+
   };
 
   const handleSubmit = async (e: React.FormEvent) => {

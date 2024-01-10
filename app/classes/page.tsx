@@ -4,10 +4,13 @@ import Nav from "../components/navbar";
 import {
   Box,
   Button,
+  HStack,
+  Icon,
   Input,
   InputGroup,
   InputRightElement,
   Select,
+  Text,
   useColorMode,
   useToast,
 } from "@chakra-ui/react";
@@ -25,6 +28,8 @@ import { useSemester } from "../context/SemesterContext";
 import { transformClassApiReponse } from "../utils/formatter";
 import { Skeleton } from "@chakra-ui/react";
 import { fetchData } from "next-auth/client/_utils";
+
+import { FiTrendingUp } from "react-icons/fi";
 
 export default function Classes() {
   const [value, setValue] = useState("");
@@ -121,7 +126,15 @@ export default function Classes() {
     <>
       <Nav>
         <main className="max-w-full">
-          <Box className="flex gap-3">
+          <Box display="flex" justifyContent="space-between">
+            <HStack>
+              <Icon fontSize="4xl" as={FiTrendingUp} mr={4} />
+              <Text fontSize="3xl" fontWeight="bold">
+                Classes
+              </Text>
+            </HStack>
+          </Box>
+          <Box className="flex gap-3 mt-6">
             <InputGroup>
               <InputRightElement>
                 <AiOutlineSearch />

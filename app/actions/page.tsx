@@ -56,6 +56,7 @@ import AnimatedButton from "../components/buttons/animatedbutton";
 export default function Classes() {
   const [selectedClasses, setselectedClasses] = useState<string[]>([]);
   const [selectedOption, setSelectedOption] = useState("");
+  const [repeatOption, setRepeatOption] = useState("SEND_ONCE");
   const [message, setMessage] = React.useState("");
   const [subjects, setsubjects] = useState<string[]>();
   const [scheduleDate, setscheduleDate] = useState(new Date());
@@ -197,6 +198,11 @@ export default function Classes() {
   function clearSelectedChannels() {
     setSelectedChannels([]);
   }
+
+  const handleRepeatChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+    setRepeatOption(event.target.value);
+  };
+
   const handleSelectChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
     setSelectedOption(event.target.value);
     clearSelectedClasses();
@@ -316,7 +322,8 @@ export default function Classes() {
         recipients,
         message,
         convertDateFormat(scheduleDate),
-        session.data?.user.id
+        session.data?.user.id,
+        repeatOption
       )
         .then((x) => {
           if (x.statusCode === 500) {
@@ -420,7 +427,6 @@ export default function Classes() {
             >
               <option value="announcemessage">Announce message</option>
               <option value="schedulemessage">Schedule a message</option>
-              <option value="recurringmessage">Recurring message</option>
             </Select>
 
             {selectedOption != "" && (
@@ -540,6 +546,23 @@ export default function Classes() {
                       }}
                     />
                   </Box>
+                </>
+              )}
+
+            {selectedOption == "schedulemessage" &&
+              (selectedClasses.length != 0 || selectedChannels.length != 0) && (
+                <>
+                  <Text>
+                    Please select the occurance for the scheduled message
+                  </Text>
+
+                  <Select value={repeatOption} onChange={handleRepeatChange}>
+                    <option value="SEND_ONCE">Send Once</option>
+                    <option value="SEND_EVERY_WEEK">Send Every Week</option>
+                    <option value="SEND_EVERY_OTHER_WEEK">
+                      Send Every Other Week
+                    </option>
+                  </Select>
                 </>
               )}
 

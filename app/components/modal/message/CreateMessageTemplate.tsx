@@ -10,6 +10,7 @@ import {
   InputRightElement,
   Select,
   useToast,
+  Checkbox,
 } from "@chakra-ui/react";
 import React, { SyntheticEvent, useState } from "react";
 import ModalTemplate from "../ModalTemplate";
@@ -33,7 +34,7 @@ type FormData = {
   name: string;
   category: string;
   content: string;
-  is_global: boolean,
+  is_global: boolean;
   // data_map: Map<string, string>;
 };
 
@@ -55,7 +56,7 @@ const CreateMessageTemplate = (props: Props) => {
     type: "free",
   });
   const [error, setError] = useState("");
-  const {data} = useSession();
+  const { data } = useSession();
   const isEmptyString = (str: string) => {
     const s = str.trim();
     return !s || s.length == 0;
@@ -64,8 +65,8 @@ const CreateMessageTemplate = (props: Props) => {
   const toast = useToast();
 
   const isDuplicateParams = (content: string) => {
-    const splits = content.split("{?")
-    const map = new Map<string,string>();
+    const splits = content.split("{?");
+    const map = new Map<string, string>();
     for (let i = 0; i < splits.length; i++) {
       const str = splits[i];
       if (str.trim() !== "") {
@@ -86,9 +87,9 @@ const CreateMessageTemplate = (props: Props) => {
       isDuplicate: false,
       map: map,
     };
-  }
+  };
 
-  const sendData = async (data_map: Map<string,string> | undefined) => {
+  const sendData = async (data_map: Map<string, string> | undefined) => {
     const map = data_map ?? new Map();
     if (!data?.user.id) {
       toast({
@@ -98,7 +99,7 @@ const CreateMessageTemplate = (props: Props) => {
       });
       return;
     }
-    setLoading(true)
+    setLoading(true);
 
     try {
       await createMessageTemplate(
@@ -108,15 +109,14 @@ const CreateMessageTemplate = (props: Props) => {
         formData.is_global,
         formData.category,
         data?.user.id
-      )
+      );
       toast({
         title: "Succesful!",
         status: "success",
         isClosable: true,
       });
-
     } catch (error) {
-      console.log(error)
+      console.log(error);
       toast({
         title: "Error! Unable to create channel right now",
         status: "error",
@@ -125,7 +125,7 @@ const CreateMessageTemplate = (props: Props) => {
     }
 
     setLoading(false);
-  }
+  };
 
   const handleSubmit = (e: SyntheticEvent) => {
     e.preventDefault();
@@ -138,13 +138,12 @@ const CreateMessageTemplate = (props: Props) => {
       setError("Fields should be filled!");
       return;
     }
-    const {isDuplicate, map: data_map} = isDuplicateParams(formData.content)
+    const { isDuplicate, map: data_map } = isDuplicateParams(formData.content);
     if (isDuplicate) {
       setError("Content params should be unique!");
       return;
     }
-    sendData(data_map)
-
+    sendData(data_map);
   };
 
   const handleCancel = () => {
@@ -177,8 +176,9 @@ const CreateMessageTemplate = (props: Props) => {
       cursorPos,
       formData.content.length
     );
-    const type = "#" + (param.type === "free" ? "free" : "fixed:" + param.type)
-    const newString = prefix.trimEnd() + ` \{?${p + type}\} ` + suffix.trimStart();
+    const type = "#" + (param.type === "free" ? "free" : "fixed:" + param.type);
+    const newString =
+      prefix.trimEnd() + ` \{?${p + type}\} ` + suffix.trimStart();
 
     // const map = formData.data_map;
     // map.set(p, param.type);
@@ -203,12 +203,12 @@ const CreateMessageTemplate = (props: Props) => {
         }
       />
       <Box>Set to Global</Box>
-      <Input
-        value={formData.category}
+      <Checkbox
+        checked={formData.is_global}
         onChange={(e) =>
           setFormData(() => ({
             ...formData,
-            category: e.target.value,
+            is_global: e.target.checked,
           }))
         }
       />
@@ -236,9 +236,7 @@ const CreateMessageTemplate = (props: Props) => {
       />
       <Box className="flex py-1 gap-2">
         <InputGroup>
-          <InputRightElement
-            className="w-2/5"
-          >
+          <InputRightElement className="w-2/5">
             <Select
               placeholder="Select option"
               value={param.type}

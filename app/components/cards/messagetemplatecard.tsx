@@ -25,10 +25,7 @@ const MessageTemplateCard = (props: Props) => {
       <CardBody py={0}>
         <Box display="flex" className="items-center py-1">
           <Text fontSize={["xs","sm"]} noOfLines={[1, 3]}>
-            {props.data.content} Lorem ipsum dolor sit amet consectetur
-            adipisicing elit. Eos illum nulla expedita facilis magni dolores
-            adipisci atque necessitatibus asperiores rem, reiciendis vel dolor
-            delectus excepturi consequatur? Sint libero ex animi?
+            {props.data.raw_content}
           </Text>
         </Box>
         <Box display="flex" className="items-center py-1">

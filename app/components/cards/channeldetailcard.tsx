@@ -39,6 +39,7 @@ import {
   CLASS_BOT_QUERY,
   getClassBot,
   queryStudentClass,
+  removeChannel,
 } from "@/app/utils/constants";
 import {
   transformClassSubjectFormat,
@@ -47,6 +48,7 @@ import {
 import { MdOutlineDescription } from "react-icons/md";
 import { MdOutlineSensorDoor } from "react-icons/md";
 import ChannelDetailModal from "../modal/channeldetailmodal";
+import { ConfirmationModal } from "../modal/confirmationmodal";
 
 interface Data {
   channel: Channel;
@@ -57,6 +59,8 @@ interface Data {
 export default function ChannelDetailCard(props: Data) {
   const [studentClassList, setStudentClassList] = useState<RoomClass[]>([]);
   const channelDetailModalDisclosure = useDisclosure();
+
+  const confirmationModalDisclosure = useDisclosure();
 
   const [isLoading, setIsLoading] = useState(false);
   const toast = useToast();
@@ -77,6 +81,10 @@ export default function ChannelDetailCard(props: Data) {
 
   function openDetailModal() {
     channelDetailModalDisclosure.onOpen();
+  }
+
+  function openDeleteModal() {
+    confirmationModalDisclosure.onOpen();
   }
 
   const getStudentClass = async () => {
@@ -107,19 +115,36 @@ export default function ChannelDetailCard(props: Data) {
     openDetailModal();
   };
 
-  const handleDeleteChannelClick = () => {};
+  const handleDeleteButtonClick = () => {
+    openDeleteModal();
+  };
+
+  const handleDeleteChannel = (): Promise<void> => {
+    return new Promise<void>((resolve, reject) => {
+      removeChannel(props.channel.channel_id)
+        .then(() => {
+          resolve();
+        })
+        .catch((err) => {
+          console.error(err);
+          reject(err);
+        });
+    });
+  };
 
   return (
     <Card className="hover:cursor-pointer hover:scale-105 transition">
       <CardHeader>
-        <Heading size="md">{props.channel.channel_name}</Heading>
+        <Heading size="md" maxWidth="sm">
+          {props.channel.channel_name}
+        </Heading>
         <CloseButton
           size="sm"
           position="absolute"
           top="1rem"
           right="1rem"
           onClick={() => {
-            handleDeleteChannelClick();
+            handleDeleteButtonClick();
           }}
         />
       </CardHeader>
@@ -171,6 +196,16 @@ export default function ChannelDetailCard(props: Data) {
         {...channelDetailModalDisclosure}
         roomClasses={studentClassList}
         refreshPage={props.refreshPage}
+      />
+
+      <ConfirmationModal
+        {...confirmationModalDisclosure}
+        title="Delete Confirmation"
+        description="Are you sure you want to delete selected channel ?"
+        action={handleDeleteChannel}
+        refreshPage={props.refreshPage}
+        successMessage="Channel successfuly removed !"
+        errorMessage="Failed to remove channel !"
       />
     </Card>
   );
