@@ -198,6 +198,7 @@ const Page = (props: Props) => {
       </Nav>
       {modal?.type === "add" ? (
         <CreateAutoRespond
+          refreshPage={refreshPage}
           isOpen={modal?.show}
           onClose={() => {setModal(undefined)}}
         />

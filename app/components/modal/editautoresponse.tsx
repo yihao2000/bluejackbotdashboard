@@ -169,34 +169,46 @@ const EditAutoResponse = (props: Props) => {
 
     useEffect(() => {
         if (classes.length > 0 && channels.length > 0) {
-          let remainingClassIds = new Set(formData.trigger_recipients.split(','));
-          let newSelectedChannels : string[] = [];
-          let newSelectedClasses : string[] = [];
-    
+          const recipientClassIds = new Set(formData.trigger_recipients.split(','));
+          let newSelectedChannels: string[] = [];
+          let newSelectedClasses: string[] = [];
+      
           channels.forEach(channel => {
             const channelClassIds = new Set(channel.channel_subscribers);
-            if (Array.from(channelClassIds).every(id => remainingClassIds.has(id))) {
+            if (Array.from(channelClassIds).every(id => recipientClassIds.has(id))) {
               newSelectedChannels.push(channel.channel_id);
-              channelClassIds.forEach(id => remainingClassIds.delete(id));
             }
           });
-    
+
+          let coveredClassIds = new Set<string>();
+          newSelectedChannels.forEach(channelId => {
+            const channel = channels.find(c => c.channel_id === channelId);
+            if (channel) {
+              channel.channel_subscribers.forEach(classId => {
+                coveredClassIds.add(classId);
+              });
+            }
+          });
+
           classes.forEach(cls => {
-            if (remainingClassIds.has(cls.id)) {
+            if (recipientClassIds.has(cls.id) && !coveredClassIds.has(cls.id)) {
               newSelectedClasses.push(cls.id);
-              remainingClassIds.delete(cls.id);
+              coveredClassIds.add(cls.id);
             }
           });
-    
+      
           setSelectedChannels(newSelectedChannels);
           setSelectedClasses(newSelectedClasses);
-    
-          if (remainingClassIds.size > 0) {
+      
+          const allCovered = Array.from(recipientClassIds).every(id => coveredClassIds.has(id));
+          if (!allCovered) {
             setWarningMessage("One or more previously included classes are no longer available for selection");
+          } else {
+            setWarningMessage(""); // Clear the message if all recipients are covered
           }
         }
-      }, [classes, channels, formData.trigger_recipients]);
-  
+      }, [classes, channels]);
+      
     const clearAll = () => {
       /*
       Clear all selected classes and channels too here
@@ -266,7 +278,7 @@ const EditAutoResponse = (props: Props) => {
         return;
       }
     
-      sendData(formData);
+      sendData(formData).then(props.refreshPage).finally(props.onClose);
     };
   
     const handleRecipientChange = (selectedClasses: string[], selectedChannels: string[]) => {

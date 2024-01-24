@@ -29,6 +29,7 @@ type Props = {
   onClose: () => void;
   onSuccess?: (data: AutoResponse) => void;
   onFail?: () => void;
+  refreshPage: () => void;
 };
 
 type FormData = {
@@ -225,7 +226,7 @@ const CreateAutoRespond = (props: Props) => {
       return;
     }
   
-    sendData(formData);
+    sendData(formData).then(props.refreshPage).finally(props.onClose);;
   };
 
   const handleRecipientChange = (selectedClasses: string[], selectedChannels: string[]) => {

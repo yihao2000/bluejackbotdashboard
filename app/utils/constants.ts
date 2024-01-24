@@ -580,12 +580,13 @@ export const removeStudentClass = async (
 };
 
 
-export const queryScheduledMessages = async () => {
+export const queryScheduledMessages = async (owner_id: string) => {
   const response = await fetch(SCHEDULED_MESSAGES_QUERY, {
-    method: "GET",
+    method: "POST",
     headers: {
       "Content-Type": "application/json",
     },
+    body: JSON.stringify({ owner_id: owner_id })
   });
 
   if (!response.ok) {

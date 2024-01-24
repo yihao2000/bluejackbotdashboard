@@ -14,7 +14,7 @@ type Props = {
   toDelete: boolean;
 };
 
-type GroupedClasses = {
+export type GroupedClasses = {
     [subject: string]: string[];
 };
 

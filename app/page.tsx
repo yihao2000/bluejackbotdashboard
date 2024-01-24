@@ -2,6 +2,7 @@
 import Image from "next/image";
 import Nav from "./components/navbar";
 import {
+  Badge,
   Box,
   Button,
   Card,
@@ -11,6 +12,7 @@ import {
   HStack,
   Heading,
   Icon,
+  Skeleton,
   Stack,
   StackDivider,
   Text,
@@ -21,15 +23,18 @@ import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
 import { redirect } from "next/navigation";
 import { useSemester } from "./context/SemesterContext";
-import { FiHome } from "react-icons/fi";
+import { FiHome, FiMessageCircle } from "react-icons/fi";
 import {
   queryScheduledMessages,
+  queryStudentClass,
   removeScheduledMessage,
 } from "./utils/constants";
-import { ScheduledMessage } from "./interfaces/interfaces";
-import { convertAndAdjustDate } from "./utils/formatter";
+import { RoomClass, ScheduledMessage } from "./interfaces/interfaces";
+import { convertAndAdjustDate, parseContent, transformStudentClassResponse } from "./utils/formatter";
 import { ConfirmationModal } from "./components/modal/confirmationmodal";
 import { LuCalendarClock } from "react-icons/lu";
+import { GroupedClasses } from "./components/modal/autoresponsedetailmodal";
+import ScheduledMessageCard from "./components/cards/scheduledmessagecard";
 
 export default function Home() {
   const session = useSession();
@@ -78,7 +83,7 @@ export default function Home() {
   };
 
   useEffect(() => {
-    queryScheduledMessages().then((x) => {
+    queryScheduledMessages(session.data?.user.id || '').then((x) => {
       setScheduledMessages(x);
     });
   }, [refresh]);
@@ -111,41 +116,27 @@ export default function Home() {
               >
                 <Icon fontSize="xl" as={LuCalendarClock} mr={3} />
                 <Text fontWeight="medium" fontSize="xl">
-                  Scheduled Messages
+                  Your Pending Scheduled Messages
                 </Text>
               </Box>
             </Box>
-            <Box display="flex" flexDirection="column" gap="1" mt="1">
-              {scheduledMessages.map((x, index) => (
-                <Card
-                  borderRadius="xl"
-                  key={index}
-                  _hover={{
-                    background: "#f7f7f7", // Change the background color to a darker shade on hover
-                  }}
-                >
-                  <CardHeader fontWeight="bold" fontSize="sm">
-                    Scheduled for {" "}
-                    <Text display="inline" color="grey" fontSize="md">
-                      {convertAndAdjustDate(x.time)}
-                    </Text>
-                    <CloseButton
-                      size="md"
-                      position="absolute"
-                      right="0"
-                      top="0"
-                      m="2"
-                      onClick={() => {
-                        removeButtonClick(x);
-                      }}
-                    />
-                  </CardHeader>
-
-                  <CardBody pt="0" m="0">
-                    <Text fontSize="xl">{x.content}</Text>
-                  </CardBody>
-                </Card>
-              ))}
+            <Box display="flex" flexDirection="column" gap="1" mt="5">
+              {scheduledMessages.length > 0 ? (
+                scheduledMessages.map((x, index) => (
+                  <ScheduledMessageCard
+                    key={index}
+                    scheduledMessage={x}
+                    removeButtonClick={removeButtonClick}
+                  />
+                ))
+              ) : (
+                <Box textAlign="center" mt="5">
+                  <Icon as={FiMessageCircle} w={10} h={10} color="gray.500" />
+                  <Text mt={2} fontSize="lg" color="gray.500">
+                    No scheduled messages yet.
+                  </Text>
+                </Box>
+              )}
             </Box>
           </Box>
         </main>
