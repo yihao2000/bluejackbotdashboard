@@ -17,8 +17,9 @@ import { FaUser, FaLock } from "react-icons/fa";
 import { useRouter } from "next/navigation";
 import { signIn, useSession } from "next-auth/react";
 import { getSalt } from "@/app/utils/constants";
-
+declare const window: any;
 function LoginBox() {
+
   const toast = useToast();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");

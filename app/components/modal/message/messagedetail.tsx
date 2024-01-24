@@ -1,7 +1,8 @@
 import { MessageTemplate } from "@/app/interfaces/interfaces";
-import { Box, Button, Divider, Flex, Text } from "@chakra-ui/react";
+import { Box, Button, Divider, Flex, Text, Wrap, WrapItem } from "@chakra-ui/react";
 import React from "react";
 import ModalTemplate from "../ModalTemplate";
+import { parseContent } from "@/app/utils/formatter";
 
 type Props = {
   data: MessageTemplate | undefined;
@@ -13,7 +14,7 @@ type Props = {
 const MessageDetail = (props: Props) => {
   const header = (
     <Flex alignItems="center" gap={2}>
-      <span>Template Detail</span>
+      <span>Template Details</span>
     </Flex>
   );
 
@@ -21,9 +22,9 @@ const MessageDetail = (props: Props) => {
     <Box className="flex gap-2 flex-col p-2">
       {props.data ? (
         <>
-          <Box display={"flex"}>
-            <Box fontWeight={"semibold"}>Name :</Box>&nbsp;
-            <Text fontWeight={"bold"} color={"blue.400"}>
+          <Box display={"vertical"}>
+            <Box fontWeight={"semibold"}>Name</Box>
+            <Text fontWeight={"bold"} fontSize={{base: "xl"}} color={"blue.400"}>
               {props.data.name}
             </Text>
           </Box>
@@ -31,13 +32,28 @@ const MessageDetail = (props: Props) => {
           <Box display={"flex"} flexDirection={"column"}>
             <Box fontWeight={"semibold"}>Content</Box>
             <Box maxHeight={"20rem"} overflowY={"auto"} className="py-2 px-1">
-              {props.data.raw_content}
+            <Box 
+                border="1px solid" 
+                borderColor="blue.300" 
+                borderRadius="lg" 
+                p="4" 
+                my="1" 
+                bg="blue.50"
+            >
+              <Wrap>
+                {parseContent(props.data.raw_content).map((element, index) => (
+                    <WrapItem key={index}>
+                        {typeof element === 'string' ? <Text fontSize={["xs","sm"]}>{element}</Text> : element}
+                    </WrapItem>
+                ))}
+              </Wrap>
+            </Box>
             </Box>
           </Box>
 
           {props.data.category ? (
-            <Box display={"flex"}>
-              <Box fontWeight={"semibold"}>Category :</Box>&nbsp;
+            <Box display={"vertical"}>
+              <Box fontWeight={"semibold"}>Category</Box>
               <Text color={"green.400"} fontWeight={"bold"}>
                 {props.data.category}
               </Text>
@@ -46,12 +62,14 @@ const MessageDetail = (props: Props) => {
 
           {props.data.data_map.size > 0 ? (
             <Box display={"flex"} flexDirection={"column"} width={"100%"}>
-              <Box fontWeight={"semibold"}>Data Map :</Box>
+              <Box fontWeight={"semibold"}>Template Variables</Box>
               {Array.from(props.data.data_map.keys()).map((key, i) => (
                 <Text>{`${key} -> ${props.data?.data_map.get(key)}`}</Text>
               ))}
             </Box>
           ) : null}
+
+          <Divider p="2" />
           <Button colorScheme="blue">Use</Button>
         </>
       ) : (
@@ -59,7 +77,6 @@ const MessageDetail = (props: Props) => {
           <b>Data not Found</b>
         </Text>
       )}
-      <Divider p="2" />
     </Box>
   );
 

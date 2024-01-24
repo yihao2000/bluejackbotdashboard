@@ -39,7 +39,7 @@ const data: Array<MessageTemplate> = [
     data_map: new Map<string, string>([["test", "BB01"]]),
     raw_content: "uga buga",
     id: "123",
-    is_shared: false,
+    is_shared: 1,
   },
   {
     name: "123123",
@@ -48,7 +48,7 @@ const data: Array<MessageTemplate> = [
     data_map: new Map<string, string>([["test", "BB01"]]),
     raw_content: "uga buga",
     id: "4444",
-    is_shared: false,
+    is_shared: 0,
   },
 ];
 
@@ -63,7 +63,35 @@ const Page = (props: Props) => {
   const [filter, setFilter] = useState("");
   const [loading, setLoading] = useState(false);
   const [templates, setTemplates] = useState<Array<MessageTemplate>>(data);
+  const [filteredTemplates, setFilteredTemplates] = useState<Array<MessageTemplate>>([]);
   const toast = useToast();
+
+  const [refresh, setRefresh] = useState(false);
+
+  const applyFilter = () => {
+    let filtered = templates;
+
+    switch (filter) {
+      case 'linked':
+        filtered = filtered.filter(template => template.is_shared === 1);
+        break;
+      case 'unlinked':
+        filtered = filtered.filter(template => template.is_shared === 0);
+        break;
+      default:
+        break;
+    }
+
+    if (search) {
+      filtered = filtered.filter(template =>
+        template.name.toLowerCase().includes(search.toLowerCase()) ||
+        template.raw_content.toLowerCase().includes(search.toLowerCase())
+      );
+    }
+
+    setFilteredTemplates(filtered);
+  };
+  
   const fetchData = async () => {
     setLoading(true);
     try {
@@ -127,9 +155,18 @@ const Page = (props: Props) => {
     });
   };
 
+  const refreshPage = () => {
+    console.log("Refreshing");
+    setRefresh(!refresh);
+  };
+
   useEffect(() => {
     fetchData();
-  }, []);
+  }, [refresh]);
+
+  useEffect(() => {
+    applyFilter();
+  }, [templates, filter, search]);
 
   return (
     <>
@@ -139,12 +176,12 @@ const Page = (props: Props) => {
             <HStack>
               <Icon fontSize="4xl" as={AiOutlineMessage} mr={4} />
               <Text fontSize="3xl" fontWeight="bold">
-                Messages
+                Message Templates
               </Text>
             </HStack>
 
             <Button onClick={() => openAdd()} colorScheme="twitter">
-              Create New Message
+              Create New Message Template
             </Button>
           </Box>
           <Box className="flex gap-3 mt-6">
@@ -174,7 +211,7 @@ const Page = (props: Props) => {
           </Box>
           <Box className="py-4 px-0"></Box>
           <div className="grid-cols-3 grid gap-7">
-            {loading || !templates ? (
+            {loading || !filteredTemplates ? (
               Array.from({ length: 6 }).map((_, index) => (
                 <Box key={index} maxW="sm">
                   <Skeleton height="100px" width="100%" />
@@ -182,8 +219,8 @@ const Page = (props: Props) => {
                   <Skeleton height="20px" width="100%" mt="2" />
                 </Box>
               ))
-            ) : templates.length !== 0 ? (
-              templates.map((x) => {
+            ) : filteredTemplates.length !== 0 ? (
+              filteredTemplates.map((x) => {
                 return (
                   <MessageTemplateCard
                     key={x.id}

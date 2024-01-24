@@ -1,4 +1,6 @@
+import { ReactNode } from "react";
 import { Channel } from "../interfaces/interfaces";
+import { Badge, BadgeProps } from "@chakra-ui/react";
 
 export function transformSemesterApiResponse(responseArray: any) {
     return responseArray.map((x: any) => ({
@@ -122,6 +124,39 @@ export function transformSemesterApiResponse(responseArray: any) {
   
     return transformedData;
   }
+
+  export const parseContent = (content: string): ReactNode[] => {
+    const regex = /\{\?(\w+)#(free|fixed):?([^\}]*)\}/g;
+    const elements: ReactNode[] = [];
+    let lastIndex = 0;
+  
+    content.replace(regex, (match: string, variableName: string, type: string, fixedText: string, index: number) => {
+      if (index > lastIndex) {
+        elements.push(content.slice(lastIndex, index));
+      }
+  
+      const badgeProps: BadgeProps = {
+        key: variableName + index,
+        colorScheme: type === 'free' ? 'green' : 'orange',
+        mx: '0'
+      };
+  
+      elements.push(
+        <Badge {...badgeProps}>
+          {((type === 'fixed') && fixedText) ? fixedText : variableName}
+        </Badge>
+      );
+  
+      lastIndex = index + match.length;
+      return '';
+    });
+  
+    if (lastIndex < content.length) {
+      elements.push(content.slice(lastIndex));
+    }
+  
+    return elements;
+  };
   
   export function transformStudentClassResponse(responseArray: any){
     console.log(responseArray)

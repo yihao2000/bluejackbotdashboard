@@ -26,16 +26,16 @@ export const SERVICE_CONDITIONS_QUERY = `${API_URL}/services/getconditions`;
 export const SERVICE_APICALLS_QUERY = `${API_URL}/services/getapicalls`;
 
 export const CREATE_SERVICE = `${API_URL}/services/createservice`;
-export const CREATE_SERVICE_STATE = `${API_URL}/services/createservice`;
-export const CREATE_SERVICE_RESPONSE = `${API_URL}/services/createservice`;
-export const CREATE_SERVICE_CONDITION = `${API_URL}/services/createservice`;
-export const CREATE_SERVICE_APICALL = `${API_URL}/services/createservice`;
+export const CREATE_SERVICE_STATE = `${API_URL}/services/createstate`;
+export const CREATE_SERVICE_RESPONSE = `${API_URL}/services/createresponse`;
+export const CREATE_SERVICE_CONDITION = `${API_URL}/services/createcondition`;
+export const CREATE_SERVICE_APICALL = `${API_URL}/services/createapicall`;
 
-export const UPDATE_SERVICE = `${API_URL}/services/createservice`;
-export const UPDATE_SERVICE_STATE = `${API_URL}/services/createservice`;
-export const UPDATE_SERVICE_RESPONSE = `${API_URL}/services/createservice`;
-export const UPDATE_SERVICE_CONDITION = `${API_URL}/services/createservice`;
-export const UPDATE_SERVICE_APICALL = `${API_URL}/services/createservice`;
+export const UPDATE_SERVICE = `${API_URL}/services/updateservice`;
+export const UPDATE_SERVICE_STATE = `${API_URL}/services/updatestate`;
+export const UPDATE_SERVICE_RESPONSE = `${API_URL}/services/updateresponse`;
+export const UPDATE_SERVICE_CONDITION = `${API_URL}/services/updatecondition`;
+export const UPDATE_SERVICE_APICALL = `${API_URL}/services/updateapicall`;
 
 export const CREATE_CHANNEL = `${API_URL}/channels/createchannel`;
 export const GET_CLASS_QUERY = `${API_URL}/classes/getstudentclass`;

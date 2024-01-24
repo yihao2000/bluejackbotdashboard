@@ -14,6 +14,7 @@ import {
     Textarea,
     useToast,
     Stack,
+    Divider,
   } from "@chakra-ui/react";
   import { useEffect, useState } from "react";
   
@@ -140,21 +141,23 @@ import {
             return (
               <>
                 <Input placeholder="Response Name" name="service_response_name" value={formData.service_response_name || ''} onChange={handleChange} />
-                <Select placeholder="Select Response Condition" name="service_response_condition_id" value={formData.service_response_condition_id || ''} onChange={handleChange}>
+                <Select placeholder="Select the state this response belongs to" name="service_response_state_id" value={formData.service_response_state_id || ''} onChange={handleChange}>
+                  {/* Options for response state */}
+                </Select>
+                <Divider/>
+                <Select placeholder="Select the condition this response depends on" name="service_response_condition_id" value={formData.service_response_condition_id || ''} onChange={handleChange}>
                   {/* Options for response condition */}
                 </Select>
                 <Box display="flex" alignItems="center">
+                  <Box ml={2} mr={2}>Execute if the condition returns {formData.service_response_condition_value ? 'TRUE' : 'FALSE'}</Box>
                   <Switch isChecked={formData.service_response_condition_value} onChange={(e) => handleChange(e as any)} name="service_response_condition_value" />
-                  <Box ml={2}>Expected Condition Value (true/false)</Box>
                 </Box>
+                <Divider/>
                 <Select placeholder="Select Response Type" name="service_response_type" value={formData.service_response_type || ''} onChange={handleChange}>
                     <option value="JUMP_TO_STATE">Change to another state</option>
                     <option value="FINISH">Finish service execution</option>
                 </Select>
                 <Input placeholder="Response Value" name="service_response_value" value={formData.service_response_value || ''} onChange={handleChange} />
-                <Select placeholder="Select Response State" name="service_response_state_id" value={formData.service_response_state_id || ''} onChange={handleChange}>
-                  {/* Options for response state */}
-                </Select>
               </>
             );
       

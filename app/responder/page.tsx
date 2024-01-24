@@ -1,8 +1,8 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { ChangeEvent, useEffect, useState } from "react";
 import { AutoResponse } from "../interfaces/interfaces";
 import { getAutoResponses } from "../utils/constants";
-import { useToast } from "@chakra-ui/react";
+import { HStack, Icon, useToast } from "@chakra-ui/react";
 
 import Nav from "@/app/components/navbar";
 import {
@@ -15,16 +15,44 @@ import {
   Skeleton,
   Text,
 } from "@chakra-ui/react";
-import { AiOutlineSearch } from "react-icons/ai";
+import { AiFillMessage, AiOutlineMessage, AiOutlineSearch } from "react-icons/ai";
 import { BsFilter } from "react-icons/bs";
 import AutoResponseCard from "../components/cards/autoresponsecard";
 
 type Props = {};
 
+type ModalState = {
+  type: string;
+  data: AutoResponse | undefined;
+  show: boolean;
+};
+
 const Page = (props: Props) => {
+  const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(false);
   const [responses, setResponses] = useState<Array<AutoResponse>>([]);
+  const [filteredResponses, setFilteredResponses] = useState<Array<AutoResponse>>([]);
   const toast = useToast();
+
+  const [refresh, setRefresh] = useState(false);
+
+  const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setSearch(value);
+  };
+
+  const applyFilter = () => {
+    let filtered = responses;
+
+    if (search) {
+      filtered = filtered.filter(response =>
+        response.name.toLowerCase().includes(search.toLowerCase()) ||
+        response.response_message.toLowerCase().includes(search.toLowerCase())
+      );
+    }
+
+    setFilteredResponses(filtered);
+  };
 
   const fetchData = async () => {
     setLoading(true);
@@ -50,18 +78,51 @@ const Page = (props: Props) => {
     setLoading(false);
   };
 
+  const [modal, setModal] = useState<ModalState>({
+    type: "detail",
+    data: undefined,
+    show: false,
+  });
+
+  const openAdd = () => {
+    console.log("open");
+    setModal({
+      type: "add",
+      data: undefined,
+      show: true,
+    });
+  };
+
+  const refreshPage = () => {
+    console.log("Refreshing");
+    setRefresh(!refresh);
+  };
+
   useEffect(() => {
     fetchData();
-  }, []);
+  }, [refresh]);
+
+  useEffect(() => {
+    applyFilter();
+  }, [responses, search]);
 
   return (
     <>
       <Nav>
         <main className="max-w-full">
-          <Text fontSize={"2xl"} fontWeight={"semibold"} noOfLines={[1, 3]}>
-            Auto Responder
-          </Text>
-          {/* <Box className="flex gap-3">
+        <Box display="flex" justifyContent="space-between">
+            <HStack>
+              <Icon fontSize="4xl" as={AiOutlineMessage} mr={4} />
+              <Text fontSize="3xl" fontWeight="bold">
+                Auto Responses
+              </Text>
+            </HStack>
+
+            <Button onClick={() => openAdd()} colorScheme="twitter">
+              Create New Auto Response
+            </Button>
+          </Box>
+          <Box className="flex gap-3 mt-6">
           <InputGroup>
             <InputRightElement>
               <AiOutlineSearch />
@@ -74,29 +135,10 @@ const Page = (props: Props) => {
               size="md"
             />
           </InputGroup>
-          <Select
-            backgroundColor={"white"}
-            width={"36"}
-            defaultValue="all"
-            icon={<BsFilter />}
-            onChange={(event) => setFilter(event.target.value)}
-          >
-            <option value="all">All</option>
-            <option value="linked">Global</option>
-            <option value="unlinked">Private</option>
-          </Select>
-        </Box> */}
-          {/* <Box className="py-4 px-0">
-          <Button
-            className="bg-blue-400 text-white hover:bg-blue-600"
-            rounded={"sm"}
-            onClick={() => openAdd()}
-          >
-            Add
-          </Button>
-        </Box> */}
+        </Box>
+        <Box className="py-2 px-0"></Box>
           <div className="grid-cols-3 grid gap-7 mt-4">
-            {loading || !responses ? (
+            {loading || !filteredResponses ? (
               Array.from({ length: 6 }).map((_, index) => (
                 <Box key={index} maxW="sm">
                   <Skeleton height="100px" width="100%" />
@@ -104,18 +146,18 @@ const Page = (props: Props) => {
                   <Skeleton height="20px" width="100%" mt="2" />
                 </Box>
               ))
-            ) : responses.length !== 0 ? (
-              responses.map((x) => {
+            ) : filteredResponses.length !== 0 ? (
+              filteredResponses.map((x) => {
                 return (
                   <AutoResponseCard
                     key={x.id}
                     data={x}
-                    //   openDetail={openDetail}
+                    openDetail={() => {}}
                   />
                 );
               })
             ) : (
-              <p>No message template data available.</p>
+              <p>No auto responses data available.</p>
             )}
           </div>
         </main>

@@ -8,6 +8,8 @@ import {
   CardHeader,
   CircularProgress,
   CloseButton,
+  Divider,
+  HStack,
   Heading,
   Image,
   Modal,
@@ -50,18 +52,22 @@ import {
 import { MdOutlineDescription } from "react-icons/md";
 import { MdOutlineSensorDoor } from "react-icons/md";
 import ChannelDetailModal from "../modal/channeldetailmodal";
+import { ConfirmationModal } from "../modal/confirmationmodal";
 
 interface ItemDetailCardProps {
   item: any;
   itemType: 'service' | 'state' | 'response' | 'condition' | 'apiCall';
   onEdit: (item: any) => void;
   onDelete: (item: any) => void;
+  refreshPage: () => void;
 }
 
-export const ServiceItemDetailCard: React.FC<ItemDetailCardProps> = ({ item, itemType, onEdit, onDelete }) => {
+export const ServiceItemDetailCard: React.FC<ItemDetailCardProps> = ({ item, itemType, onEdit, onDelete, refreshPage }) => {
+
   const renderHeading = () => {
     let heading = '';
     let itemId = '';
+    let httpMethod = '';
 
     switch (itemType) {
       case 'service':
@@ -81,16 +87,32 @@ export const ServiceItemDetailCard: React.FC<ItemDetailCardProps> = ({ item, ite
         itemId = item.service_condition_id;
         break;
       case 'apiCall':
-        heading = `(${item.http_method}) ${item.api_endpoint}`;
+        heading = item.api_endpoint;
         itemId = item.service_api_call_id;
+        httpMethod = item.http_method;
         break;
       default:
         break;
     }
 
     return (
-      <Box display="flex" alignItems="center">
-        <Heading size="md" mr={3}>{heading}</Heading>
+      <Box display="vertical" alignItems="center">
+        <HStack>
+          <Heading size="md" mr={3}>{heading}</Heading>
+          <CloseButton
+            size="sm"
+            position="absolute"
+            top="1rem"
+            right="1rem"
+            onClick={() => {
+              onDelete(item);
+            }}
+          />
+        </HStack>
+        {
+          itemType == 'apiCall' && httpMethod == 'POST' ? <Badge colorScheme="orange" px={2} borderRadius="md">POST</Badge> :
+          itemType == 'apiCall' ? <Badge colorScheme="yellow" px={2} borderRadius="md">GET</Badge> : ''
+        }
         <Badge colorScheme="blue" px={2} borderRadius="md">{itemId}</Badge>
       </Box>
     );
@@ -111,6 +133,8 @@ export const ServiceItemDetailCard: React.FC<ItemDetailCardProps> = ({ item, ite
     return details;
   };
 
+  
+
   return (
     <Card className="hover:cursor-pointer hover:scale-105 transition">
       <CardHeader>
@@ -122,7 +146,6 @@ export const ServiceItemDetailCard: React.FC<ItemDetailCardProps> = ({ item, ite
       <CardFooter>
         <Stack spacing={4} direction={'row'}>
           <Button colorScheme="blue" onClick={() => onEdit(item)}>Edit</Button>
-          <Button colorScheme="red" onClick={() => onDelete(item)}>Delete</Button>
         </Stack>
       </CardFooter>
     </Card>

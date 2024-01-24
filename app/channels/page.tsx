@@ -6,18 +6,28 @@ import {
   HStack,
   Icon,
   useDisclosure,
+  Input,
+  InputGroup,
+  InputRightElement,
+  Select,
+  Skeleton,
 } from "@chakra-ui/react";
 import Nav from "../components/navbar";
 import { GoBroadcast } from "react-icons/go";
-import { useEffect, useState } from "react";
+import { ChangeEvent, useEffect, useState } from "react";
 import { Channel } from "../interfaces/interfaces";
 import { queryChannels } from "../utils/constants";
 import { CreateChannelModal } from "../components/modal/createchannelmodal";
 import ChannelDetailCard from "../components/cards/channeldetailcard";
 import { transformChannelData } from "../utils/formatter";
+import { AiOutlineSearch } from "react-icons/ai";
+import { BsFilter } from "react-icons/bs";
 
 export default function Channels() {
+  const [search, setSearch] = useState("");
   const [channels, setChannels] = useState<Channel[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [filteredChannels, setFilteredChannels] = useState<Channel[]>([]);
   const addChannelModalDisclosure = useDisclosure();
 
   const [refresh, setRefresh] = useState(false);
@@ -27,6 +37,28 @@ export default function Channels() {
       setChannels(transformChannelData(res));
     });
   }, [refresh]);
+
+  useEffect(() => {
+    applyFilter();
+  }, [channels, search]);
+
+  const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setSearch(value);
+  };
+
+  const applyFilter = () => {
+    let filtered = channels;
+
+    if (search) {
+      filtered = filtered.filter(channel =>
+        channel.channel_name.toLowerCase().includes(search.toLowerCase()) ||
+        channel.channel_description.toLowerCase().includes(search.toLowerCase())
+      );
+    }
+
+    setFilteredChannels(filtered);
+  };
 
   const refreshPage = () => {
     console.log("Refreshing");
@@ -62,18 +94,44 @@ export default function Channels() {
                 Create new Channel
               </Button>
             </Box>
-            <Box className="grid-cols-3 grid gap-7 mt-10">
-              {channels.map((x) => {
-                return (
-                  <ChannelDetailCard
-                    key={x.channel_id}
-                    channel={x}
-                    refreshPage={refreshPage}
-                    refresh={refresh}
-                  />
-                );
-              })}
+            <Box className="flex gap-3 mt-6">
+              <InputGroup>
+                <InputRightElement>
+                  <AiOutlineSearch />
+                </InputRightElement>
+                <Input
+                  backgroundColor={"white"}
+                  value={search}
+                  onChange={handleChange}
+                  placeholder="Search..."
+                  size="md"
+                />
+              </InputGroup>
             </Box>
+              <div className="grid-cols-3 grid gap-7 mt-8">
+                {loading || !filteredChannels ? (
+                  Array.from({ length: 6 }).map((_, index) => (
+                    <Box key={index} maxW="sm">
+                      <Skeleton height="100px" width="100%" />
+                      <Skeleton height="20px" width="100%" mt="2" />
+                      <Skeleton height="20px" width="100%" mt="2" />
+                    </Box>
+                  ))
+                ) : filteredChannels.length !== 0 ? (
+                  filteredChannels.map((channel) => {
+                    return (
+                      <ChannelDetailCard
+                        key={channel.channel_id}
+                        channel={channel}
+                        refreshPage={refreshPage}
+                        refresh={refresh}
+                      />
+                    );
+                  })
+                ) : (
+                  <p>No channel data available.</p>
+                )}
+              </div>
           </Box>
         </main>
       </Nav>

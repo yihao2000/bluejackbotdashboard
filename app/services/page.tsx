@@ -357,6 +357,7 @@ export default function Services() {
                         item={service}
                         itemType="service"
                         onEdit={handleEditService}
+                        refreshPage={refreshPage}
                         onDelete={handleDeleteService}
                       />
                     ))}
@@ -370,6 +371,7 @@ export default function Services() {
                         key={state.service_state_id}
                         item={state}
                         itemType="state"
+                        refreshPage={refreshPage}
                         onEdit={handleEditState}
                         onDelete={handleDeleteState}
                       />
@@ -384,6 +386,7 @@ export default function Services() {
                         key={response.service_response_id}
                         item={response}
                         itemType="response"
+                        refreshPage={refreshPage}
                         onEdit={handleEditResponse}
                         onDelete={handleDeleteResponse}
                       />
@@ -398,6 +401,7 @@ export default function Services() {
                         key={condition.service_condition_id}
                         item={condition}
                         itemType="condition"
+                        refreshPage={refreshPage}
                         onEdit={handleEditCondition}
                         onDelete={handleDeleteCondition}
                       />
@@ -412,6 +416,7 @@ export default function Services() {
                         key={apiCall.service_api_call_id}
                         item={apiCall}
                         itemType="apiCall"
+                        refreshPage={refreshPage}
                         onEdit={handleEditApiCall}
                         onDelete={handleDeleteApiCall}
                       />

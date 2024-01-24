@@ -91,7 +91,7 @@ const CreateMessageTemplate = (props: Props) => {
 
   const sendData = async (data_map: Map<string, string> | undefined) => {
     const map = data_map ?? new Map();
-    if (!data?.user.id) {
+    if (!(data?.user.id)) {
       toast({
         title: "Error! Unable to create channel right now",
         status: "error",

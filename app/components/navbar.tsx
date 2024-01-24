@@ -71,8 +71,8 @@ const LinkItems: Array<LinkItemProps> = [
   { name: "Home", icon: FiHome, href: "/" },
   { name: "Classes", icon: FiTrendingUp, href: "/classes" },
   { name: "Services", icon: FiCompass, href: "/services" },
-  { name: "Messages", icon: AiOutlineMessage, href: "/messages" },
-  { name: "Auto Responder", icon: AiOutlineMessage, href: "/responder" },
+  { name: "Templates", icon: AiOutlineMessage, href: "/messages" },
+  { name: "Auto Responses", icon: AiOutlineMessage, href: "/responder" },
   { name: "Channels", icon: GoBroadcast, href: "/channels" },
   { name: "Actions", icon: AiOutlineSetting, href: "/actions" },
 ];
