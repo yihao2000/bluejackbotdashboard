@@ -1,7 +1,7 @@
 import { Item, Service, ServiceAPICall, ServiceCondition, ServiceResponse, ServiceState } from "../interfaces/interfaces";
 
-// export const API_URL = "http://bluejackbot.jex.ink:3001";
-export const API_URL = "http://localhost:3001";
+export const API_URL = "http://bluejackbot.jex.ink:3001";
+// export const API_URL = "http://localhost:3001";
 
 export const CLASSES_DETAIL_QUERY = `${API_URL}/classes/query/classesdetail`;
 export const LINKED_CLASSES_QUERY = `${API_URL}/classes/query/linkedclasses`;

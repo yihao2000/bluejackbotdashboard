@@ -105,14 +105,27 @@ export default function Classes() {
       });
     };
 
-    if (selectedTemplate && hasNonEmptyValues(inputValues)) {
-      showAnnounceButton();
-    } else if (message.length > 4) {
-      showAnnounceButton();
-
-      hideAnnounceButton();
+    if(!(selectedAnnouncementType == 'manualmessage')){
+      if (selectedTemplate && hasNonEmptyValues(inputValues)) {
+        showAnnounceButton();
+      }else if (selectedTemplate && !hasNonEmptyValues(inputValues)){
+        hideAnnounceButton();
+      }else if (!selectedTemplate){
+        hideAnnounceButton();
+      }
+    }else{
+      if (message.length > 4){
+        showAnnounceButton();
+      }else{
+        hideAnnounceButton();
+      }
     }
-  }, [message, inputValues]);
+    
+  }, [message, inputValues, selectedTemplate]);
+
+  useEffect(() => {
+    setInputValues({});
+  }, [selectedTemplate]);
 
   const showAnnounceButton = () => {
     setDisplayAnnounceButton(true);

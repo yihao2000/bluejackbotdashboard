@@ -46,6 +46,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { signOut } from "next-auth/react";
 import { Semester } from "../interfaces/interfaces";
 import { useSemester } from "../context/SemesterContext";
+import { MdAnnouncement, MdAutoMode, MdOutlineAnnouncement, MdOutlineAutoAwesome, MdOutlineAutoMode, MdOutlineSpeakerGroup } from "react-icons/md";
 
 interface LinkItemProps {
   name: string;
@@ -72,9 +73,9 @@ const LinkItems: Array<LinkItemProps> = [
   { name: "Classes", icon: FiTrendingUp, href: "/classes" },
   { name: "Services", icon: FiCompass, href: "/services" },
   { name: "Templates", icon: AiOutlineMessage, href: "/messages" },
-  { name: "Auto Responses", icon: AiOutlineMessage, href: "/responder" },
+  { name: "Auto Responses", icon: MdOutlineAutoMode, href: "/responder" },
   { name: "Channels", icon: GoBroadcast, href: "/channels" },
-  { name: "Actions", icon: AiOutlineSetting, href: "/actions" },
+  { name: "Actions", icon: MdOutlineAnnouncement, href: "/actions" },
 ];
 
 const SidebarContent = ({ onClose, ...rest }: SidebarProps) => {
@@ -98,19 +99,27 @@ const SidebarContent = ({ onClose, ...rest }: SidebarProps) => {
         />
       </Box>
       {LinkItems.map((link) => (
-        <NavItem icon={link.icon} href={link.href} key={link.href}>
-          {link.name}
+        <>
+          {
+            link.name === 'Actions' && <Divider mt={4} mb={4} />
+          }
+          <NavItem icon={link.icon} href={link.href} key={link.href}>
+          <Text fontSize={link.name === 'Actions' ? 'lg' : ''} fontWeight={link.name === 'Actions' ? 'bold' : ''}>{link.name}</Text>
         </NavItem>
+        </>
+        
       ))}
 
-      <Divider paddingY="4" />
+      <Divider mt={4} mb={4}/>
       <NavItem
         icon={CiLogout}
         key={"logout"}
         onClick={() => {
           signOut();
         }}
+        mt={4}
         position="relative" // Change position to relative
+        textColor={"red.600"}
       >
         Logout
       </NavItem>
