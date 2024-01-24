@@ -10,6 +10,8 @@ import {
   Select,
   Text,
   Textarea,
+  Wrap,
+  WrapItem,
   useColorMode,
 } from "@chakra-ui/react";
 import {
@@ -17,6 +19,7 @@ import {
   Channel,
   Class,
   ClassLineGroup,
+  MessageTemplate,
 } from "../interfaces/interfaces";
 import ClassCard from "../components/cards/classdetailcard";
 import { BsFilter } from "react-icons/bs";
@@ -27,6 +30,7 @@ import {
   LINKED_CLASSES_COURSE_QUERY,
   LINKED_CLASSES_QUERY,
   announceMessage,
+  getMessageTemplates,
   queryAssistantClasses,
   queryChannels,
   queryClassesCourses,
@@ -43,6 +47,9 @@ import { useSemester } from "../context/SemesterContext";
 import {
   convertDateFormat,
   formatTime,
+  parseContent,
+  parseContentAction,
+  processContentWithUserInputs,
   transformChannelData,
   transformClassApiReponse,
   transformClassSubjectFormat,
@@ -61,6 +68,8 @@ export default function Classes() {
   const [subjects, setsubjects] = useState<string[]>();
   const [scheduleDate, setscheduleDate] = useState(new Date());
   const { selectedSemester } = useSemester();
+
+  const [displayAnnounceButton, setDisplayAnnounceButton] = useState(false);
 
   const [classLoading, setclassLoading] = useState(false);
   const [actionLoading, setActionLoading] = useState(false);
@@ -83,6 +92,35 @@ export default function Classes() {
   const [channelLoading, setChannelLoading] = useState(false);
 
   const [selectedAnnouncementType, setSelectedAnnouncementType] = useState("");
+
+  const [templates, setTemplates] = useState<Array<MessageTemplate>>([]);
+  const [selectedTemplate, setSelectedTemplate] = useState<MessageTemplate>();
+
+  const [inputValues, setInputValues] = useState<{ [key: string]: string }>({});
+
+  useEffect(() => {
+    const hasNonEmptyValues = (obj: { [key: string]: unknown }): boolean => {
+      return Object.values(obj).some((value) => {
+        return typeof value === "string" && value.trim() !== "";
+      });
+    };
+
+    if (selectedTemplate && hasNonEmptyValues(inputValues)) {
+      showAnnounceButton();
+    } else if (message.length > 4) {
+      showAnnounceButton();
+
+      hideAnnounceButton();
+    }
+  }, [message, inputValues]);
+
+  const showAnnounceButton = () => {
+    setDisplayAnnounceButton(true);
+  };
+
+  const hideAnnounceButton = () => {
+    setDisplayAnnounceButton(false);
+  };
 
   const getClassessubjects = (classes: Class[]) => {
     const subjectSet = new Set<string>();
@@ -163,6 +201,30 @@ export default function Classes() {
 
     loadAssistantClasses();
     loadChannels();
+    loadTemplates();
+  };
+
+  const loadTemplates = async () => {
+    try {
+      const res = await getMessageTemplates();
+      const arr: Array<MessageTemplate> = [];
+      res.forEach((r: any) => {
+        if (r.data_map) {
+          const map = new Map(Object.entries(r.data_map));
+          arr.push({
+            ...r,
+            data_map: map,
+          });
+        } else arr.push(r);
+      });
+      setTemplates(arr);
+    } catch (error) {
+      toast({
+        title: "Error! Cannot get template data!",
+        status: "error",
+        isClosable: true,
+      });
+    }
   };
 
   const clearSelectedClassesData = () => {
@@ -208,6 +270,8 @@ export default function Classes() {
   const handleAnnouncementTypeSelectChange = (
     event: React.ChangeEvent<HTMLSelectElement>
   ) => {
+    setSelectedTemplate(undefined);
+    setMessage("");
     setSelectedAnnouncementType(event.target.value);
   };
 
@@ -236,6 +300,10 @@ export default function Classes() {
     }
   };
 
+  const handleTemplateCardClick = (card: MessageTemplate) => {
+    setSelectedTemplate(card);
+  };
+
   const showAnnouncementModal = () => {
     setOpenAnnouncementModal(true);
   };
@@ -254,7 +322,6 @@ export default function Classes() {
 
     if (selectedClasses.length > 0) {
       recipients = selectedClasses;
-      console.log(recipients);
     }
 
     if (selectedChannels.length > 0) {
@@ -281,7 +348,15 @@ export default function Classes() {
     const recipients = getRecipients();
 
     if (recipients.length > 0) {
-      announceMessage(recipients, message)
+      announceMessage(
+        recipients,
+        selectedAnnouncementType == "manualmessage"
+          ? message
+          : (processContentWithUserInputs(
+              selectedTemplate?.raw_content || "",
+              inputValues
+            ) as string)
+      )
         .then((x) => {
           if (x.statusCode === 500) {
             toast({
@@ -330,7 +405,12 @@ export default function Classes() {
     if (recipients.length > 0 && session.data != null) {
       scheduleMessage(
         recipients,
-        message,
+        selectedAnnouncementType == "manualmessage"
+          ? message
+          : (processContentWithUserInputs(
+              selectedTemplate?.raw_content || "",
+              inputValues
+            ) as string),
         convertDateFormat(scheduleDate),
         session.data?.user.id,
         repeatOption
@@ -604,9 +684,58 @@ export default function Classes() {
                   </>
                 )}
 
-                {selectedAnnouncementType == "templatemessage" && <></>}
+                {selectedAnnouncementType == "templatemessage" && (
+                  <>
+                    <Text>Select template you want to use</Text>
+                    <Box
+                      display={{ base: "block", md: "flex" }}
+                      flexWrap="wrap"
+                      gap="2"
+                    >
+                      {templates.map((x) => {
+                        return (
+                          <SelectableCard
+                            data={x}
+                            itemType="messagetemplate"
+                            key={x.id}
+                            onClick={() => handleTemplateCardClick(x)}
+                            isSelected={selectedTemplate == x}
+                          />
+                        );
+                      })}
+                    </Box>
+                    {selectedTemplate && (
+                      <Wrap
+                        border="1px"
+                        borderRadius="xl"
+                        pt="2"
+                        pl="3"
+                        borderColor="gray.300"
+                        minHeight="sm"
+                      >
+                        {parseContentAction({
+                          content: selectedTemplate.raw_content,
+                          inputValues: inputValues,
+                          setInputValues: setInputValues,
+                        }).map((element, index) => (
+                          <WrapItem
+                            alignItems="center"
+                            key={index}
+                            display="flex"
+                          >
+                            {typeof element === "string" ? (
+                              <Text fontSize={["sm", "md"]}>{element}</Text>
+                            ) : (
+                              element
+                            )}
+                          </WrapItem>
+                        ))}
+                      </Wrap>
+                    )}
+                  </>
+                )}
 
-                {message.length > 4 && (
+                {displayAnnounceButton && (
                   <>
                     <AnimatedButton
                       isLoading={actionLoading}
