@@ -11,6 +11,8 @@ import {
   Select,
   useToast,
   Checkbox,
+  Switch,
+  HStack,
 } from "@chakra-ui/react";
 import React, { SyntheticEvent, useState } from "react";
 import ModalTemplate from "../ModalTemplate";
@@ -202,16 +204,17 @@ const CreateMessageTemplate = (props: Props) => {
           }))
         }
       />
-      <Box>Set to Global</Box>
-      <Checkbox
-        checked={formData.is_global}
-        onChange={(e) =>
-          setFormData(() => ({
-            ...formData,
-            is_global: e.target.checked,
-          }))
-        }
-      />
+
+      <HStack>
+        <Box>Global Template (shared to others)</Box>
+        <Switch isChecked={formData.is_global} onChange={(e) =>
+              setFormData(() => ({
+                ...formData,
+                is_global: e.target.checked,
+              }))
+            }/>
+      </HStack>
+      
 
       <Box>Category</Box>
       <Input
@@ -293,9 +296,6 @@ const CreateMessageTemplate = (props: Props) => {
           loadingText="Creating..."
         >
           Create
-        </Button>
-        <Button onClick={handleCancel} colorScheme="red">
-          Cancel
         </Button>
       </Box>
     </Box>

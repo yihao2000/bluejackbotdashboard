@@ -12,6 +12,8 @@ import {
   Flex,
   Textarea,
   Text,
+  Switch,
+  HStack,
 } from "@chakra-ui/react";
 import { AiOutlinePlus } from "react-icons/ai";
 
@@ -83,16 +85,16 @@ const CreateAutoRespond = (props: Props) => {
         <option value="2">CLASS 2</option>
       </Select>
 
-      <Box>Set to Global</Box>
-      <Checkbox
-        checked={formData.is_enabled}
-        onChange={(e) =>
-          setFormData(() => ({
-            ...formData,
-            is_enabled: e.target.checked,
-          }))
-        }
-      />
+      <HStack>
+        <Box>Enabled</Box>
+        <Switch isChecked={formData.is_enabled} onChange={(e) =>
+            setFormData(() => ({
+              ...formData,
+              is_enabled: e.target.checked,
+            }))
+          }/>
+      </HStack>
+      
 
       <Box>Trigger Type</Box>
       <Select
@@ -154,9 +156,6 @@ const CreateAutoRespond = (props: Props) => {
           loadingText="Creating..."
         >
           Create
-        </Button>
-        <Button onClick={handleCancel} colorScheme="red">
-          Cancel
         </Button>
       </Box>
     </Box>

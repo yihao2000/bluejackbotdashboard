@@ -79,11 +79,7 @@ const Page = (props: Props) => {
     setLoading(false);
   };
 
-  const [modal, setModal] = useState<ModalState>({
-    type: "detail",
-    data: undefined,
-    show: false,
-  });
+  const [modal, setModal] = useState<ModalState>()
 
   const openAdd = () => {
     console.log("open");
