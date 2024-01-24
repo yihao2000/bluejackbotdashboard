@@ -94,7 +94,7 @@ export interface ServiceCondition {
   service_condition_id: string;
   service_condition_name: string;
   service_condition_type: string;
-  service_condition_value: string
+  service_condition_value: string;
 }
 
 export interface ServiceAPICall {
@@ -110,6 +110,11 @@ export interface RoomClass {
   subject: String;
 }
 
+export interface ParseContentProps {
+  content: string;
+  onInputChange?: (input: string) => void;
+}
+
 export interface MessageTemplate {
   id: string;
   owner_id: string;
@@ -121,13 +126,13 @@ export interface MessageTemplate {
 }
 
 export interface AutoResponse {
-  id: string
-  name: string
-  trigger_type: string
-  trigger_words: Array<string>
-  trigger_recipients: string
-  response_message: string
-  is_enabled: boolean
+  id: string;
+  name: string;
+  trigger_type: string;
+  trigger_words: Array<string>;
+  trigger_recipients: string;
+  response_message: string;
+  is_enabled: boolean;
 }
 
 export interface ScheduledMessage {

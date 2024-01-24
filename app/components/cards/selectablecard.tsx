@@ -4,15 +4,15 @@ import { transformClassSubjectFormat } from "@/app/utils/formatter";
 import { PiClipboardTextLight } from "react-icons/pi";
 import { RiGroupLine } from "react-icons/ri";
 import { MdOutlineMeetingRoom } from "react-icons/md";
-import { Channel, Class } from "@/app/interfaces/interfaces";
+import { Channel, Class, MessageTemplate } from "@/app/interfaces/interfaces";
 
 // ... (imports)
 
 type SelectableCardProps = {
-  data: Channel | Class;
+  data: Channel | Class | MessageTemplate;
   onClick: () => void;
   isSelected: boolean;
-  itemType: "channel" | "class";
+  itemType: "channel" | "class" | "messagetemplate";
 };
 
 function SelectableCard({
@@ -36,11 +36,11 @@ function SelectableCard({
     >
       <Box mb="2">
         <Text fontSize="lg" fontWeight="bold">
-          {itemType === "class"
-            ? transformClassSubjectFormat((data as Class).subject)
-            : itemType === "channel"
-            ? (data as Channel).channel_name
-            : null}
+          {itemType === "class" &&
+            transformClassSubjectFormat((data as Class).subject)}
+
+          {itemType === "channel" ? (data as Channel).channel_name : null}
+          {itemType === "messagetemplate" && (data as MessageTemplate).name}
         </Text>
       </Box>
       {itemType === "class" && (

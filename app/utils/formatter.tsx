@@ -1,129 +1,124 @@
-import { Fragment, ReactNode } from "react";
+import { Fragment, ChangeEvent, ReactNode } from "react";
 import { Channel } from "../interfaces/interfaces";
-import { Badge, BadgeProps, Text } from "@chakra-ui/react";
+import { Badge, BadgeProps, Text, Input } from "@chakra-ui/react";
 
 export function transformSemesterApiResponse(responseArray: any) {
-    return responseArray.map((x: any) => ({
-      description: x["a:Description"],
-      semesterID: x["a:SemesterId"],
-    }));
-  }
+  return responseArray.map((x: any) => ({
+    description: x["a:Description"],
+    semesterID: x["a:SemesterId"],
+  }));
+}
 
-  export function transformClassApiReponse(responseArray: any) {
-    return responseArray.response["a:Schedule"].map((x: any) => ({
-      assistant: x["a:Assistant"],
-      campus: x["a:Campus"],
-      class: x["a:Class"],
-      day: x["a:Day"],
-      id: x["a:Id"],
-      room: x["a:Room"],
-      totalStudent: x["a:TotalStudent"],
-      shift: x["a:Shift"],
-      subject: x["a:Subject"],
-      courseOutlineId: x["a:CourseOutlineId"],
-      realization: x["a:Realization"]
-    }));
-  }
+export function transformClassApiReponse(responseArray: any) {
+  return responseArray.response["a:Schedule"].map((x: any) => ({
+    assistant: x["a:Assistant"],
+    campus: x["a:Campus"],
+    class: x["a:Class"],
+    day: x["a:Day"],
+    id: x["a:Id"],
+    room: x["a:Room"],
+    totalStudent: x["a:TotalStudent"],
+    shift: x["a:Shift"],
+    subject: x["a:Subject"],
+    courseOutlineId: x["a:CourseOutlineId"],
+    realization: x["a:Realization"],
+  }));
+}
 
-  export function transformCourseOutlineApiResponse(responseArray: any) {
+export function transformCourseOutlineApiResponse(responseArray: any) {
+  return responseArray.response.map((x: any) => ({
+    id: x["a:CourseOutlineId"],
+    name: transformClassSubjectFormat(x["a:Name"]),
+    subjects: x["a:Subjects"],
+  }));
+}
+
+export function transformClassNameFormat(className: string) {
+  const parts = className.split("-");
+
+  if (parts.length === 2) {
+    const formattedString = `${parts[0]} (LAB) - ${parts[1]} (LEC)`;
+    return formattedString;
+  } else {
+    // Handle the case when the input string doesn't have the expected format
+    return className;
+  }
+}
+
+export function transformClassTransactionApiResponse(responseArray: any) {
+  if (Array.isArray(responseArray.response)) {
     return responseArray.response.map((x: any) => ({
-      id: x["a:CourseOutlineId"],
-      name: transformClassSubjectFormat(x["a:Name"]),
-      subjects: x["a:Subjects"]
+      label: transformClassSubjectFormat(x["a:ClassName"]),
+      value: x["a:ClassTransactionId"],
     }));
+  } else {
+    // Handle the case when responseArray.response is not an array
+    console.error("Response is not an array:", responseArray.response);
+    return [];
   }
+}
 
-  export function transformClassNameFormat(className: string){
-    const parts = className.split('-');
-    
-    if (parts.length === 2) {
-        const formattedString = `${parts[0]} (LAB) - ${parts[1]} (LEC)`;
-        return formattedString;
+export function transformClassSubjectFormat(subject: String) {
+  return subject.split("-").join(" - ");
+}
+
+export function transformStringToDate(date: string) {
+  return new Date(date).toDateString();
+}
+
+export function formatTime(date: Date) {
+  return `${String(date.getHours()).padStart(2, "0")}:${String(
+    date.getMinutes()
+  ).padStart(2, "0")}`;
+}
+
+export function convertDateFormat(date: Date): string {
+  // Get individual components of the date
+  const year = date.getFullYear();
+  const month = (date.getMonth() + 1).toString().padStart(2, "0");
+  const day = date.getDate().toString().padStart(2, "0");
+  const hours = date.getHours().toString().padStart(2, "0");
+  const minutes = date.getMinutes().toString().padStart(2, "0");
+
+  // Determine the UTC offset in minutes
+  const utcOffsetMinutes = date.getTimezoneOffset();
+
+  // Convert UTC offset to the desired format
+  const utcOffsetHours = Math.floor(Math.abs(utcOffsetMinutes) / 60)
+    .toString()
+    .padStart(2, "0");
+  const utcOffsetSign = utcOffsetMinutes < 0 ? "+" : "-";
+
+  // Construct the formatted date string
+  const formattedDate = `${year}-${month}-${day} ${hours}:${minutes}:00UTC${utcOffsetSign}${utcOffsetHours}00`;
+
+  return formattedDate;
+}
+
+export function transformChannelData(data: any[]): Channel[] {
+  const transformedData: Channel[] = [];
+
+  data.forEach((item) => {
+    const existingChannel = transformedData.find(
+      (channel) => channel.channel_id === item.channel_id
+    );
+
+    if (existingChannel) {
+      existingChannel.channel_subscribers.push(item.class_id);
     } else {
-        // Handle the case when the input string doesn't have the expected format
-        return className;
+      const newChannel: Channel = {
+        channel_id: item.channel_id,
+        channel_name: item.channel_name,
+        channel_description: item.channel_description,
+        channel_subscribers: [item.class_id],
+      };
+
+      transformedData.push(newChannel);
     }
-  }
+  });
 
-  export function transformClassTransactionApiResponse(responseArray: any) {
-    if (Array.isArray(responseArray.response)) {
-      return responseArray.response.map((x: any) => ({
-        label: transformClassSubjectFormat(x["a:ClassName"]),
-        value: x["a:ClassTransactionId"],
-
-      }));
-    } else {
-      // Handle the case when responseArray.response is not an array
-      console.error("Response is not an array:", responseArray.response);
-      return [];
-    }
-  }
-  
-
-
-  export function transformClassSubjectFormat(subject: String){
-    return subject.split("-").join(" - ")
-  }
-
-  export function transformStringToDate(date: string){
-    return new Date(date).toDateString()
-  }
-
-  export function formatTime(date: Date) {
-    return `${String(date.getHours()).padStart(2, "0")}:${String(
-      date.getMinutes()
-    ).padStart(2, "0")}`;
-  }
-
-
-
-  export function convertDateFormat(date: Date): string {
-    // Get individual components of the date
-    const year = date.getFullYear();
-    const month = (date.getMonth() + 1).toString().padStart(2, '0');
-    const day = date.getDate().toString().padStart(2, '0');
-    const hours = date.getHours().toString().padStart(2, '0');
-    const minutes = date.getMinutes().toString().padStart(2, '0');
-
-  
-    // Determine the UTC offset in minutes
-    const utcOffsetMinutes = date.getTimezoneOffset();
-  
-    // Convert UTC offset to the desired format
-    const utcOffsetHours = Math.floor(Math.abs(utcOffsetMinutes) / 60).toString().padStart(2, '0');
-    const utcOffsetSign = utcOffsetMinutes < 0 ? '+' : '-';
-  
-    // Construct the formatted date string
-    const formattedDate = `${year}-${month}-${day} ${hours}:${minutes}:00UTC${utcOffsetSign}${utcOffsetHours}00`;
-  
-    return formattedDate;
-  }
-
-
-  export function transformChannelData(data: any[]): Channel[] {
-    const transformedData: Channel[] = [];
-  
-    data.forEach((item) => {
-      const existingChannel = transformedData.find(
-        (channel) => channel.channel_id === item.channel_id
-      );
-  
-      if (existingChannel) {
-        existingChannel.channel_subscribers.push(item.class_id);
-      } else {
-        const newChannel: Channel = {
-          channel_id: item.channel_id,
-          channel_name: item.channel_name,
-          channel_description: item.channel_description,
-          channel_subscribers: [item.class_id],
-        };
-  
-        transformedData.push(newChannel);
-      }
-    });
-  
-    return transformedData;
-  }
+  return transformedData;
+}
 
   export const parseContent = (content: string): ReactNode[] => {
       const regex = /\{\?([^#\?}]+)#(free|fixed):?([^\}]*)\}/g;
