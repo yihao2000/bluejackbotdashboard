@@ -150,12 +150,7 @@ const CreateMessageTemplate = (props: Props) => {
     setFormData(defaultData);
   };
 
-  const header = (
-    <Flex alignItems="center" gap={2}>
-      <span>New Message Template</span>
-    </Flex>
-  );
-
+  
   const insertParam = () => {
     if (!param.name || param.name.trim() === "") {
       return;
@@ -163,35 +158,40 @@ const CreateMessageTemplate = (props: Props) => {
     setError("");
     const p = param.name.trim();
     // if (formData.data_map.has(p)) {
-    //   setError("Cannot insert duplicate param keys!");
-    //   return;
-    // }
+      //   setError("Cannot insert duplicate param keys!");
+      //   return;
+      // }
 
-    const textArea = document.getElementById(
+      const textArea = document.getElementById(
       "messageContent"
-    ) as HTMLTextAreaElement;
-    const cursorPos = textArea.selectionStart;
-    const prefix = formData.content.substring(0, cursorPos);
-    const suffix = formData.content.substring(
-      cursorPos,
-      formData.content.length
-    );
-    const type = "#" + (param.type === "free" ? "free" : "fixed:" + param.type);
-    const newString =
-      prefix.trimEnd() + ` \{?${p + type}\} ` + suffix.trimStart();
-
-    // const map = formData.data_map;
-    // map.set(p, param.type);
-
-    setFormData(() => ({
-      ...formData,
-      // data_map: map,
-      content: newString,
-    }));
-  };
-
-  const body = (
-    <Box gap="2" display="Flex" flexDirection="column">
+      ) as HTMLTextAreaElement;
+      const cursorPos = textArea.selectionStart;
+      const prefix = formData.content.substring(0, cursorPos);
+      const suffix = formData.content.substring(
+        cursorPos,
+        formData.content.length
+        );
+        const type = "#" + (param.type === "free" ? "free" : "fixed:" + param.type);
+        const newString =
+        prefix.trimEnd() + ` \{?${p + type}\} ` + suffix.trimStart();
+        
+        // const map = formData.data_map;
+        // map.set(p, param.type);
+        
+        setFormData(() => ({
+          ...formData,
+          // data_map: map,
+          content: newString,
+        }));
+      };
+      
+      const header = (
+        <Flex alignItems="center" gap={2}>
+          <span>New Message Template</span>
+        </Flex>
+      );
+      const body = (
+        <Box gap="2" display="Flex" flexDirection="column">
       <Box>Template Name</Box>
       <Input
         value={formData.name}

@@ -82,6 +82,8 @@ export default function Classes() {
 
   const [channelLoading, setChannelLoading] = useState(false);
 
+  const [selectedAnnouncementType, setSelectedAnnouncementType] = useState("");
+
   const getClassessubjects = (classes: Class[]) => {
     const subjectSet = new Set<string>();
 
@@ -203,7 +205,15 @@ export default function Classes() {
     setRepeatOption(event.target.value);
   };
 
-  const handleSelectChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+  const handleAnnouncementTypeSelectChange = (
+    event: React.ChangeEvent<HTMLSelectElement>
+  ) => {
+    setSelectedAnnouncementType(event.target.value);
+  };
+
+  const handleTypeSelectChange = (
+    event: React.ChangeEvent<HTMLSelectElement>
+  ) => {
     setSelectedOption(event.target.value);
     clearSelectedClasses();
   };
@@ -423,7 +433,7 @@ export default function Classes() {
             <Select
               placeholder="Select action"
               value={selectedOption}
-              onChange={handleSelectChange}
+              onChange={handleTypeSelectChange}
             >
               <option value="announcemessage">Announce message</option>
               <option value="schedulemessage">Schedule a message</option>
@@ -568,15 +578,33 @@ export default function Classes() {
 
             {(selectedClasses.length != 0 || selectedChannels.length != 0) && (
               <>
-                <Text>Please enter the announcement</Text>
-                <Textarea
-                  value={message}
-                  onChange={handleInputChange}
-                  placeholder="Announcement length must be more than 5"
-                  size="md"
-                  resize="vertical"
-                  height="xs"
-                />
+                <Text>
+                  Please select the <b>type of message</b> you want to perform
+                </Text>
+                <Select
+                  placeholder="Select action"
+                  value={selectedAnnouncementType}
+                  onChange={handleAnnouncementTypeSelectChange}
+                >
+                  <option value="manualmessage">Manual message</option>
+                  <option value="templatemessage">Template message</option>
+                </Select>
+
+                {selectedAnnouncementType == "manualmessage" && (
+                  <>
+                    <Text>Please enter the announcement</Text>
+                    <Textarea
+                      value={message}
+                      onChange={handleInputChange}
+                      placeholder="Announcement length must be more than 5"
+                      size="md"
+                      resize="vertical"
+                      height="xs"
+                    />
+                  </>
+                )}
+
+                {selectedAnnouncementType == "templatemessage" && <></>}
 
                 {message.length > 4 && (
                   <>

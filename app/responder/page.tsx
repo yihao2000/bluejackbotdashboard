@@ -18,6 +18,7 @@ import {
 import { AiFillMessage, AiOutlineMessage, AiOutlineSearch } from "react-icons/ai";
 import { BsFilter } from "react-icons/bs";
 import AutoResponseCard from "../components/cards/autoresponsecard";
+import CreateAutoRespond from "../components/modal/createautorespond";
 
 type Props = {};
 
@@ -130,7 +131,9 @@ const Page = (props: Props) => {
             <Input
               backgroundColor={"white"}
               value={search}
-              onChange={handleChange}
+              onChange={(e) => {
+                setSearch(e.target.value);
+              }}
               placeholder="Search..."
               size="md"
             />
@@ -162,6 +165,12 @@ const Page = (props: Props) => {
           </div>
         </main>
       </Nav>
+      {modal?.type === "add" ? (
+        <CreateAutoRespond
+          isOpen={modal?.show}
+          onClose={() => {setModal(undefined)}}
+        />
+      ) : null}
     </>
   );
 };
