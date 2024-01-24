@@ -59,7 +59,7 @@ const CreateAutoRespond = (props: Props) => {
   const [classes, setClasses] = useState<Class[]>([]);
   const [channels, setChannels] = useState<Channel[]>([]);
 
-  const [selectedClasses, setselectedClasses] = useState<string[]>([]);
+  const [selectedClasses, setSelectedClasses] = useState<string[]>([]);
   const [selectedChannels, setSelectedChannels] = useState<string[]>([]);
 
   const [subjects, setSubjects] = useState<string[]>();
@@ -251,7 +251,7 @@ const CreateAutoRespond = (props: Props) => {
 
   const header = (
     <Flex alignItems="center" gap={2}>
-      <span>Create Auto Responder</span>
+      <span>Create Auto Response</span>
     </Flex>
   );
   const body = (
@@ -295,7 +295,7 @@ const CreateAutoRespond = (props: Props) => {
       </Select>
       <Box>
         Trigger Words
-        <Text fontSize={"sm"} color={"red.400"}>Words are seperated by comma; e.g: hello,world,bot</Text>
+        <Text fontSize={"sm"} color={"red.400"}>Words are separated by comma; e.g: hello,world,bot</Text>
         </Box>
       <Input
         value={formData.trigger_words}
@@ -324,7 +324,7 @@ const CreateAutoRespond = (props: Props) => {
         selectedChannels={selectedChannels}
         selectedClasses={selectedClasses}
         setSelectedChannels={setSelectedChannels}
-        setSelectedClasses={setSelectedChannels}
+        setSelectedClasses={setSelectedClasses}
         channels={channels}
         classes={classes}
         handleRecipientChange={handleRecipientChange} 

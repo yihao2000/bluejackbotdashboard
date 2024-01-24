@@ -20,6 +20,9 @@ import { BsFilter } from "react-icons/bs";
 import AutoResponseCard from "../components/cards/autoresponsecard";
 import CreateAutoRespond from "../components/modal/createautorespond";
 import { useSession } from "next-auth/react";
+import AutoResponseDetail from "../components/modal/autoresponsedetailmodal";
+import EditMessageTemplate from "../components/modal/message/EditMessageTemplate";
+import EditAutoResponse from "../components/modal/editautoresponse";
 
 type Props = {};
 
@@ -85,11 +88,38 @@ const Page = (props: Props) => {
 
   const [modal, setModal] = useState<ModalState>()
 
+  const closeModal = () => {
+    setModal({
+      type: "none",
+      data: undefined,
+      show: false,
+    });
+  };
+
   const openAdd = () => {
     console.log("open");
     setModal({
       type: "add",
       data: undefined,
+      show: true,
+    });
+  };
+
+  const openEdit = (id: string) => {
+    const data = responses.find((x) => x.id === id);
+    console.log("open");
+    setModal({
+      type: "edit",
+      data: data,
+      show: true,
+    });
+  };
+
+  const openDetail = (id: string) => {
+    const data = responses.find((x) => x.id === id);
+    setModal({
+      type: "detail",
+      data: data,
       show: true,
     });
   };
@@ -156,7 +186,7 @@ const Page = (props: Props) => {
                     key={x.id}
                     refreshPage={refreshPage}
                     data={x}
-                    openDetail={() => {}}
+                    openDetail={() => openDetail(x.id)}
                   />
                 );
               })
@@ -170,6 +200,33 @@ const Page = (props: Props) => {
         <CreateAutoRespond
           isOpen={modal?.show}
           onClose={() => {setModal(undefined)}}
+        />
+      ) : 
+      modal?.type === "detail" ? (
+        <AutoResponseDetail
+          show={modal?.show}
+          data={modal?.data}
+          onClose={closeModal}
+          onEdit={() => openEdit(modal.data?.id || '')}
+          toDelete={false}
+        />
+      ) : 
+      modal?.type === "edit" ? (
+        <EditAutoResponse
+          templateData={{
+            id: modal.data?.id || '',
+            name: modal.data?.name || '',
+            trigger_type: modal.data?.trigger_type || '',
+            trigger_recipients: modal.data?.trigger_recipients || '',
+            is_enabled: modal.data?.is_enabled || false,
+            response_message: modal.data?.response_message || '',
+            trigger_words: modal.data && modal.data.trigger_words ? modal.data.trigger_words.join(',') : ''
+          } || {} as any}
+          isOpen={modal.show}
+          refreshPage={refreshPage}
+          onClose={closeModal}
+          onFail={() => {}}
+          onSuccess={() => {}}
         />
       ) : null}
     </>

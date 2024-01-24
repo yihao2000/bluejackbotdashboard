@@ -325,13 +325,18 @@ export default function Services() {
       <Nav>
         <main className="max-w-full">
           <Box>
-            <Box display="flex" justifyContent="space-between">
+            <Box display="vertical" justifyContent="space-between">
               <HStack>
                 <Icon fontSize="4xl" as={FiCompass} mr={4} />
                 <Text fontSize="3xl" fontWeight="bold">
                   Services
                 </Text>
               </HStack>
+              <Text mt={4} fontSize="sm" fontWeight="light" color={"red.400"}>
+                  This section is meant for bot administrators only, value display formats are meant to be closer to the database representation of each entity. 
+                  <br/>
+                  All primary keys (IDs) are displayed, as well as actual column values of each item in the database.
+              </Text>
             </Box>
             <Spacer height={10}/>
             <Tabs isFitted variant="enclosed" colorScheme="blue">

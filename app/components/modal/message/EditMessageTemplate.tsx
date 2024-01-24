@@ -52,7 +52,7 @@ const defaultData = {
   // data_map: new Map<string, string>(),
 };
 
-const fixedParams = ["Class Code", "Class Name", "Course Code", "Course Name"];
+const fixedParams = ["Class Name", "Course Code", "Course Name"];
 
 const EditMessageTemplate = (props: Props) => {
   const [formData, setFormData] = useState<FormData>(props.templateData);

@@ -10,6 +10,7 @@ import {
   CardHeader,
   CloseButton,
   Divider,
+  HStack,
   Heading,
   Text,
   useDisclosure,
@@ -50,16 +51,22 @@ const AutoResponseCard = (props: Props) => {
   return (
     <Card className="hover:cursor-pointer hover:scale-105 transition" size="md">
         <CardHeader>
-            <Heading size={["sm","md"]}>{props.data.name}</Heading>
-            <CloseButton
-                size="sm"
-                position="absolute"
-                top="1rem"
-                right="1rem"
-                onClick={() => {
-                handleDeleteButtonClick();
-                }}
-            />
+            <HStack>
+                <Heading size={["sm","md"]}>{props.data.name}</Heading>
+                <CloseButton
+                    size="sm"
+                    position="absolute"
+                    top="1rem"
+                    right="1rem"
+                    onClick={() => {
+                    handleDeleteButtonClick();
+                    }}
+                />
+            </HStack>
+            {
+                props.data.is_enabled ? <Badge colorScheme="green" px={2} borderRadius="md">Active</Badge> :
+                <Badge colorScheme="red" px={2} borderRadius="md">Inactive</Badge>
+            }
         </CardHeader>
         <CardBody py={0}>
             <Box 
@@ -93,7 +100,7 @@ const AutoResponseCard = (props: Props) => {
             </Box>
             <Divider/>
             <Text fontSize={{ base: "sm", md: "md" }} noOfLines={[1, 3]} my="2">
-                Currently active in {<Badge mx="1" my="1" colorScheme="orange" fontSize={{base: "md"}}>
+                Currently <b>{props.data.is_enabled ? 'active' : 'inactive'}</b> in {<Badge mx="1" my="1" colorScheme="orange" fontSize={{base: "md"}}>
                             {props.data.trigger_recipients.split(',')?.length}
                         </Badge>} classes
             </Text>

@@ -1,6 +1,6 @@
 import { AutoResponse, Channel, Class, ClassLineGroup } from "@/app/interfaces/interfaces";
 import { useState } from 'react';
-import { Box, Menu, MenuButton, MenuList, MenuItem, Checkbox, Button } from '@chakra-ui/react';
+import { Box, Menu, MenuButton, MenuList, MenuItem, Checkbox, Button, Text } from '@chakra-ui/react';
 
 interface EnhancedMultiSelectProps {
     selectedClasses: string[],
@@ -13,6 +13,7 @@ interface EnhancedMultiSelectProps {
 }
 
 const EnhancedMultiSelect: React.FC<EnhancedMultiSelectProps> = ({ selectedClasses, setSelectedClasses, selectedChannels, setSelectedChannels, classes, channels, handleRecipientChange }) => {
+    
     const handleClassesChange = (selectedClassId: string) => {
         const isClassSelected = selectedClasses.includes(selectedClassId);
         const updatedSelectedClasses = isClassSelected
@@ -42,15 +43,14 @@ const EnhancedMultiSelect: React.FC<EnhancedMultiSelectProps> = ({ selectedClass
                 <MenuList>
                     {classes.map((c) => (
                         <MenuItem key={c.id} onClick={() => handleClassesChange(c.id)}>
-                            <Checkbox isChecked={selectedClasses.includes(c.id)} onChange={() => handleClassesChange(c.id)}>
-                                ({c.class}) {c.subject}
-                            </Checkbox>
+                            <Checkbox isChecked={selectedClasses.includes(c.id)} onChange={() => handleClassesChange(c.id)}/>
+                            <Text ml={5}>({c.class}) {c.subject}</Text>
                         </MenuItem>
                     ))}
                 </MenuList>
             </Menu>
-
-            <Box>Enabled Channels</Box>
+            
+            <Box mt={2}>(Admin Only) Enabled Channels</Box>
             <Menu closeOnSelect={false}>
                 <MenuButton as={Button} width={"100%"} backgroundColor={"white"} border="1px solid gray">
                     {selectedChannels.length} Channels Selected
@@ -58,9 +58,8 @@ const EnhancedMultiSelect: React.FC<EnhancedMultiSelectProps> = ({ selectedClass
                 <MenuList>
                     {channels.map((c) => (
                         <MenuItem key={c.channel_id} onClick={() => handleChannelsChange(c.channel_id)}>
-                            <Checkbox isChecked={selectedChannels.includes(c.channel_id)} onChange={() => handleChannelsChange(c.channel_id)}>
-                                {c.channel_name} [{c.channel_subscribers.length} classes]
-                            </Checkbox>
+                            <Checkbox isChecked={selectedChannels.includes(c.channel_id)} onChange={() => handleChannelsChange(c.channel_id)}/>
+                            <Text ml={5}>{c.channel_name} [{c.channel_subscribers.length} classes]</Text>
                         </MenuItem>
                     ))}
                 </MenuList>

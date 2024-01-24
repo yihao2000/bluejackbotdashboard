@@ -59,6 +59,7 @@ export const DELETE_CHANNEL = `${API_URL}/channels/deletechannel`
 export const DELETE_TEMPLATE = `${API_URL}/message_templates/removeMessageTemplate`
 export const DELETE_AUTO_RESPONSE = `${API_URL}/auto_responses/deleteAutoRespond`
 export const CREATE_AUTO_RESPONSE = `${API_URL}/auto_responses/createAutoRespond`;
+export const UPDATE_AUTO_RESPONSE = `${API_URL}/auto_responses/updateAutoRespond`;
 
 
 export const getSalt = async (username: string) => {
@@ -714,6 +715,39 @@ export const createAutoResponse = async (
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
+      name: name,
+      is_enabled: is_enabled,
+      response_message: response_message,
+      trigger_recipients: trigger_recipients,
+      trigger_type: trigger_type,
+      trigger_words: trigger_words,
+      owner_id: owner_id
+    }),
+  });
+
+  if (!response.ok) {
+    throw new Error("Error fetching data");
+  }
+  return await response.json();
+};
+
+export const updateAutoResponse = async (
+  id: string,
+  name: string,
+  is_enabled: boolean,
+  response_message: string,
+  trigger_recipients: string,
+  trigger_type: string,
+  trigger_words: string,
+  owner_id: string
+) => {
+  const response = await fetch(UPDATE_AUTO_RESPONSE, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      id: id,
       name: name,
       is_enabled: is_enabled,
       response_message: response_message,

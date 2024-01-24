@@ -121,6 +121,7 @@ import {
     };
     
     const extractApiCallId = (value: string) => {
+      if(!value) return '';
       const match = value.match(/^\$API_CALL\{"([^"]+)"\}$/);
       return match ? match[1] : '';
     };

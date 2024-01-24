@@ -105,9 +105,9 @@ export interface ServiceAPICall {
 }
 
 export interface RoomClass {
-  id: String;
-  class: String;
-  subject: String;
+  id: string;
+  class: string;
+  subject: string;
 }
 
 export interface ParseContentProps {
