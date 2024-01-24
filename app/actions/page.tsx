@@ -206,7 +206,7 @@ export default function Classes() {
 
   const loadTemplates = async () => {
     try {
-      const res = await getMessageTemplates();
+      const res = await getMessageTemplates(session.data?.user.id || '');
       const arr: Array<MessageTemplate> = [];
       res.forEach((r: any) => {
         if (r.data_map) {

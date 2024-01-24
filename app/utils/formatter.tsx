@@ -166,7 +166,101 @@ export function transformChannelData(data: any[]): Channel[] {
       return elements;
   };
 
-
+  interface ParseContentActionProps {
+    content: string;
+    inputValues: { [key: string]: string };
+    setInputValues: (inputValues: { [key: string]: string }) => void;
+  }
+  
+  export const parseContentAction = ({
+    content,
+    inputValues,
+    setInputValues,
+  }: ParseContentActionProps): ReactNode[] => {
+    const regex = /\{\?([^#\?}]+)#(free|fixed):?([^\}]*)\}/g;
+    const elements: ReactNode[] = [];
+    let lastIndex = 0;
+  
+    content.replace(
+      regex,
+      (
+        match: string,
+        variableName: string,
+        type: string,
+        fixedText: string,
+        index: number
+      ) => {
+        if (index > lastIndex) {
+          elements.push(content.slice(lastIndex, index));
+        }
+  
+        if (type === "free") {
+          const handleInputChange = (event: ChangeEvent<HTMLInputElement>) => {
+            setInputValues({
+              ...inputValues,
+              [variableName]: event.target.value,
+            });
+          };
+  
+          const textFieldProps = {
+            key: variableName + index,
+            placeholder: fixedText || variableName,
+            value: inputValues[variableName] || "",
+            onChange: handleInputChange,
+            mx: "0",
+            width: "sm",
+          };
+  
+          elements.push(
+            <Input display="inline-block" maxWidth="sm" {...textFieldProps} />
+          );
+        } else {
+          const badgeProps: BadgeProps = {
+            key: variableName + index,
+            colorScheme: type === "free" ? "green" : "orange",
+            mx: "0",
+          };
+  
+          elements.push(
+            <Badge {...badgeProps} display="inline-block">
+              {type === "fixed" && fixedText ? fixedText : variableName}
+            </Badge>
+          );
+        }
+  
+        lastIndex = index + match.length;
+        return "";
+      }
+    );
+  
+    if (lastIndex < content.length) {
+      elements.push(content.slice(lastIndex));
+    }
+  
+    return elements;
+  };
+  
+  export const processContentWithUserInputs = (
+    content: string,
+    userInputValues: { [key: string]: string }
+  ): string | boolean => {
+    const regex = /\{\?([^#\?}]+)#(free|fixed):?([^\}]*)\}/g;
+  
+    const processedContent = content.replace(
+      regex,
+      (match, variableName, type) => {
+        if (type === "free" && userInputValues[variableName] !== undefined) {
+          return userInputValues[variableName];
+        }
+        return match;
+      }
+    );
+  
+    const remainingPlaceholderRegex = /\{\?\w+#free\}/g;
+    return remainingPlaceholderRegex.test(processedContent)
+      ? false
+      : processedContent;
+  };
   
   export function transformStudentClassResponse(responseArray: any){
     console.log(responseArray)
