@@ -604,6 +604,8 @@ export default function Classes() {
                   </>
                 )}
 
+                {selectedAnnouncementType == "templatemessage" && <></>}
+
                 {message.length > 4 && (
                   <>
                     <AnimatedButton
