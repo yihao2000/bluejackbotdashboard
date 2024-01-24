@@ -121,7 +121,7 @@ export function transformChannelData(data: any[]): Channel[] {
 }
 
 export const parseContent = (content: string): ReactNode[] => {
-  const regex = /\{\?(\w+)#(free|fixed):?([^\}]*)\}/g;
+  const regex = /\{\?([^#\?}]+)#(free|fixed):?([^\}]*)\}/g;
   const elements: ReactNode[] = [];
   let lastIndex = 0;
 
@@ -173,7 +173,7 @@ export const parseContentAction = ({
   inputValues,
   setInputValues,
 }: ParseContentActionProps): ReactNode[] => {
-  const regex = /\{\?(\w+)#(free|fixed):?([^\}]*)\}/g;
+  const regex = /\{\?([^#\?}]+)#(free|fixed):?([^\}]*)\}/g;
   const elements: ReactNode[] = [];
   let lastIndex = 0;
 
@@ -240,7 +240,7 @@ export const processContentWithUserInputs = (
   content: string,
   userInputValues: { [key: string]: string }
 ): string | boolean => {
-  const regex = /\{\?(\w+)#(free|fixed):?([^\}]*)\}/g;
+  const regex = /\{\?([^#\?}]+)#(free|fixed):?([^\}]*)\}/g;
 
   const processedContent = content.replace(
     regex,
