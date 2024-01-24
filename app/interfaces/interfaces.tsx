@@ -115,7 +115,7 @@ export interface MessageTemplate {
   owner_id: string;
   name: string;
   raw_content: string;
-  is_shared: number,
+  is_shared: number;
   data_map: Map<string, any>;
   category: string;
 }

@@ -125,8 +125,8 @@ export default function Home() {
                   }}
                 >
                   <CardHeader fontWeight="bold" fontSize="sm">
-                    Scheduled for:{" "}
-                    <Text display="inline" color="red">
+                    Scheduled for {" "}
+                    <Text display="inline" color="grey" fontSize="md">
                       {convertAndAdjustDate(x.time)}
                     </Text>
                     <CloseButton

@@ -19,6 +19,7 @@ import { AiFillMessage, AiOutlineMessage, AiOutlineSearch } from "react-icons/ai
 import { BsFilter } from "react-icons/bs";
 import AutoResponseCard from "../components/cards/autoresponsecard";
 import CreateAutoRespond from "../components/modal/createautorespond";
+import { useSession } from "next-auth/react";
 
 type Props = {};
 
@@ -34,6 +35,8 @@ const Page = (props: Props) => {
   const [responses, setResponses] = useState<Array<AutoResponse>>([]);
   const [filteredResponses, setFilteredResponses] = useState<Array<AutoResponse>>([]);
   const toast = useToast();
+
+  const { data } = useSession();
 
   const [refresh, setRefresh] = useState(false);
 
@@ -58,7 +61,8 @@ const Page = (props: Props) => {
   const fetchData = async () => {
     setLoading(true);
     try {
-      const res = await getAutoResponses();
+      const res = await getAutoResponses(data?.user.id || '');
+      console.log(data?.user.id)
       const arr: Array<AutoResponse> = [];
       res.forEach((r: any) => {
         const words = r.trigger_words?.split(",");
@@ -97,7 +101,7 @@ const Page = (props: Props) => {
 
   useEffect(() => {
     fetchData();
-  }, [refresh]);
+  }, [refresh, data]);
 
   useEffect(() => {
     applyFilter();
@@ -150,6 +154,7 @@ const Page = (props: Props) => {
                 return (
                   <AutoResponseCard
                     key={x.id}
+                    refreshPage={refreshPage}
                     data={x}
                     openDetail={() => {}}
                   />

@@ -1,6 +1,6 @@
-import { ReactNode } from "react";
+import { Fragment, ReactNode } from "react";
 import { Channel } from "../interfaces/interfaces";
-import { Badge, BadgeProps } from "@chakra-ui/react";
+import { Badge, BadgeProps, Text } from "@chakra-ui/react";
 
 export function transformSemesterApiResponse(responseArray: any) {
     return responseArray.map((x: any) => ({
@@ -126,37 +126,52 @@ export function transformSemesterApiResponse(responseArray: any) {
   }
 
   export const parseContent = (content: string): ReactNode[] => {
-    const regex = /\{\?(\w+)#(free|fixed):?([^\}]*)\}/g;
-    const elements: ReactNode[] = [];
-    let lastIndex = 0;
-  
-    content.replace(regex, (match: string, variableName: string, type: string, fixedText: string, index: number) => {
-      if (index > lastIndex) {
-        elements.push(content.slice(lastIndex, index));
-      }
-  
-      const badgeProps: BadgeProps = {
-        key: variableName + index,
-        colorScheme: type === 'free' ? 'green' : 'orange',
-        mx: '0'
+      const regex = /\{\?([^#\?}]+)#(free|fixed):?([^\}]*)\}/g;
+      const elements: ReactNode[] = [];
+      let lastIndex = 0;
+
+      const addTextWithNewlines = (text: string) => {
+          const lines = text.split('\n');
+          return lines.map((line, index) => (
+              <Fragment key={index}>
+                  {index > 0 && <br />}
+                  {line}
+              </Fragment>
+          ));
       };
-  
-      elements.push(
-        <Badge {...badgeProps}>
-          {((type === 'fixed') && fixedText) ? fixedText : variableName}
-        </Badge>
-      );
-  
-      lastIndex = index + match.length;
-      return '';
-    });
-  
-    if (lastIndex < content.length) {
-      elements.push(content.slice(lastIndex));
-    }
-  
-    return elements;
+
+      content.replace(regex, (match: string, variableName: string, type: string, fixedText: string, index: number) => {
+          if (index > lastIndex) {
+              elements.push(addTextWithNewlines(content.slice(lastIndex, index)));
+          }
+
+          // Style for simulated badge
+          const badgeStyle = {
+              backgroundColor: type === 'free' ? '#9AE6B4' : '#FEB2B2', // Green or Orange background
+              color: 'black', // Text color
+              borderRadius: '2px', // Rounded corners
+              padding: '2px 4px', // Padding inside the span
+              margin: '0 2px', // Margin around the span
+          };
+
+          elements.push(
+              <span style={badgeStyle}>
+                  {type === 'fixed' && fixedText ? fixedText : variableName}
+              </span>
+          );
+
+          lastIndex = index + match.length;
+          return '';
+      });
+
+      if (lastIndex < content.length) {
+          elements.push(addTextWithNewlines(content.slice(lastIndex)));
+      }
+
+      return elements;
   };
+
+
   
   export function transformStudentClassResponse(responseArray: any){
     console.log(responseArray)
@@ -173,7 +188,7 @@ export function transformSemesterApiResponse(responseArray: any) {
     const originalDate = new Date(dateString);
   
     // Add 7 hours to the date
-    originalDate.setHours(originalDate.getHours());
+    originalDate.setHours(originalDate.getHours() + 7);
   
     // Manually build the formatted date string
     const daysOfWeek = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];

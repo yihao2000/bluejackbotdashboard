@@ -37,18 +37,28 @@ export const UPDATE_SERVICE_RESPONSE = `${API_URL}/services/updateresponse`;
 export const UPDATE_SERVICE_CONDITION = `${API_URL}/services/updatecondition`;
 export const UPDATE_SERVICE_APICALL = `${API_URL}/services/updateapicall`;
 
+export const DELETE_SERVICE = `${API_URL}/services/deleteservice`;
+export const DELETE_SERVICE_STATE = `${API_URL}/services/deletestate`;
+export const DELETE_SERVICE_RESPONSE = `${API_URL}/services/deleteresponse`;
+export const DELETE_SERVICE_CONDITION = `${API_URL}/services/deletecondition`;
+export const DELETE_SERVICE_APICALL = `${API_URL}/services/deleteapicall`;
+
 export const CREATE_CHANNEL = `${API_URL}/channels/createchannel`;
 export const GET_CLASS_QUERY = `${API_URL}/classes/getstudentclass`;
 export const REMOVE_CHANNEL_CLASS = `${API_URL}/channels/removechannelsubscribers`;
 export const SCHEDULED_MESSAGES_QUERY = `${API_URL}/messages/getscheduledmessages`;
 export const CREATE_MESSAGE_TEMPLATE = `${API_URL}/message_templates/createmessagetemplate`;
+export const UPDATE_MESSAGE_TEMPLATE = `${API_URL}/message_templates/updatemessagetemplate`;
 export const GET_MESSAGE_TEMPLATES = `${API_URL}/message_templates/getmessagetemplates`;
-export const GET_AUTO_RESPONSES = `${API_URL}/message_templates/getAutoResponses`;
+export const GET_AUTO_RESPONSES = `${API_URL}/auto_responses/getAutoResponses`;
 export const REMOVE_SCHEDULED_MESSAGE = `${API_URL}/messages/removescheduledmessage`;
 export const GET_ACTIVE_SEMESTER_COURSE_OUTLINE = `${API_URL}/semesters/getactivesemestercourseoutlines`;
 export const GET_CLASS_TRANSACTION_BY_COURSE_OUTLINE_AND_SEMESTER = `${API_URL}/classes/getclasstransactionbycourseoutlineandsemester`;
 export const ADD_CHANNEL_SUBSCRIBERS = `${API_URL}/channels/addchannelsubscribers`;
 export const DELETE_CHANNEL = `${API_URL}/channels/deletechannel`
+export const DELETE_TEMPLATE = `${API_URL}/message_templates/removeMessageTemplate`
+export const DELETE_AUTO_RESPONSE = `${API_URL}/auto_responses/deleteAutoRespond`
+export const CREATE_AUTO_RESPONSE = `${API_URL}/auto_responses/createAutoRespond`;
 
 
 export const getSalt = async (username: string) => {
@@ -504,6 +514,37 @@ export const createOrSaveServiceApiCall = async (apiCallData : ServiceAPICall) =
   }
 };
 
+export const deleteServiceItem = async (itemType: string, itemId : string) => {
+  const endpoint = 
+  itemType == 'service' ? DELETE_SERVICE 
+  : itemType == 'state' ? DELETE_SERVICE_STATE
+  : itemType == 'response' ? DELETE_SERVICE_RESPONSE
+  : itemType == 'condition' ? DELETE_SERVICE_CONDITION
+  : itemType == 'apicall' ? DELETE_SERVICE_APICALL : 'NONE';
+
+  if(endpoint === 'NONE') return;
+
+  try {
+    const response = await fetch(endpoint, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({itemId: itemId}),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(`API request failed: ${errorData.message}`);
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error("API Error:", error);
+    throw error;
+  }
+};
+
 export const queryStudentClass = async (transactionID: String) => {
   const response = await fetch(GET_CLASS_QUERY, {
     method: "POST",
@@ -567,12 +608,13 @@ export const removeScheduledMessage = async (id: String) => {
   return await response.json();
 };
 
-export const getAutoResponses = async () => {
+export const getAutoResponses = async (owner_id : string) => {
   const response = await fetch(GET_AUTO_RESPONSES, {
-    method: "GET",
+    method: "POST",
     headers: {
       "Content-Type": "application/json",
     },
+    body: JSON.stringify({owner_id: owner_id})
   });
   if (!response.ok) {
     throw new Error("Error fetching data");
@@ -580,12 +622,13 @@ export const getAutoResponses = async () => {
   return await response.json();
 };
 
-export const getMessageTemplates = async () => {
+export const getMessageTemplates = async (owner_id : string) => {
   const response = await fetch(GET_MESSAGE_TEMPLATES, {
-    method: "GET",
+    method: "POST",
     headers: {
       "Content-Type": "application/json",
     },
+    body: JSON.stringify({owner_id: owner_id})
   });
 
   if (!response.ok) {
@@ -615,6 +658,69 @@ export const createMessageTemplate = async (
       is_shared: is_shared,
       category: category,
       owner_id: owner_id,
+    }),
+  });
+
+  if (!response.ok) {
+    throw new Error("Error fetching data");
+  }
+  return await response.json();
+};
+
+export const updateMessageTemplate = async (
+  id: string,
+  name: string,
+  content: string,
+  data_map: Map<string, string>,
+  is_shared: boolean,
+  category: string,
+  owner_id: string
+) => {
+  const obj = Object.fromEntries(data_map);
+  const response = await fetch(UPDATE_MESSAGE_TEMPLATE, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      id: id,
+      name: name,
+      content: content,
+      data_map: obj,
+      is_shared: is_shared,
+      category: category,
+      owner_id: owner_id,
+    }),
+  });
+
+  if (!response.ok) {
+    throw new Error("Error fetching data");
+  }
+  return await response.json();
+};
+
+export const createAutoResponse = async (
+  name: string,
+  is_enabled: boolean,
+  response_message: string,
+  trigger_recipients: string,
+  trigger_type: string,
+  trigger_words: string,
+  owner_id: string
+) => {
+  const response = await fetch(CREATE_AUTO_RESPONSE, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      name: name,
+      is_enabled: is_enabled,
+      response_message: response_message,
+      trigger_recipients: trigger_recipients,
+      trigger_type: trigger_type,
+      trigger_words: trigger_words,
+      owner_id: owner_id
     }),
   });
 
@@ -706,14 +812,48 @@ export const addChannelSubscribers = async (
 };
 
 export const removeChannel = async (
-  channelID: String,
+  channelId: String,
 ) => {
   const response = await fetch(DELETE_CHANNEL, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
     },
-    body: JSON.stringify({ channelID }),
+    body: JSON.stringify({ channelId }),
+  });
+
+  if (!response.ok) {
+    throw new Error("Error fetching data");
+  }
+  return await response.json();
+};
+
+export const deleteTemplate = async (
+  templateId: String,
+) => {
+  const response = await fetch(DELETE_TEMPLATE, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ templateId }),
+  });
+
+  if (!response.ok) {
+    throw new Error("Error fetching data");
+  }
+  return await response.json();
+};
+
+export const deleteAutoResponse = async (
+  responseId: String,
+) => {
+  const response = await fetch(DELETE_AUTO_RESPONSE, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ responseId }),
   });
 
   if (!response.ok) {

@@ -21,7 +21,7 @@ import Nav from "../components/navbar";
 import { GoBroadcast } from "react-icons/go";
 import { useEffect, useState } from "react";
 import { Channel, Service, ServiceState, ServiceResponse, ServiceCondition, ServiceAPICall } from "../interfaces/interfaces";
-import { createOrSaveService, createOrSaveServiceApiCall, createOrSaveServiceCondition, createOrSaveServiceResponse, createOrSaveServiceState, queryChannels, queryServiceApiCalls, queryServiceConditions, queryServiceResponses, queryServiceStates, queryServices } from "../utils/constants";
+import { createOrSaveService, createOrSaveServiceApiCall, createOrSaveServiceCondition, createOrSaveServiceResponse, createOrSaveServiceState, deleteServiceItem, queryChannels, queryServiceApiCalls, queryServiceConditions, queryServiceResponses, queryServiceStates, queryServices } from "../utils/constants";
 import { CreateChannelModal } from "../components/modal/createchannelmodal";
 import ChannelDetailCard from "../components/cards/channeldetailcard";
 import { transformChannelData } from "../utils/formatter";
@@ -156,24 +156,19 @@ export default function Services() {
   
 
   const deleteService = (service: Service) => {
-    // API call or database operation to delete the service
-    // Example: apiDeleteService(service.service_id).then(refreshPage);
+    deleteServiceItem('service', service.service_id).then(refreshPage);
   };
   const deleteState = (state: ServiceState) => {
-    // API call or database operation to delete the service
-    // Example: apiDeleteService(service.service_id).then(refreshPage);
+    deleteServiceItem('state', state.service_state_id).then(refreshPage);
   };
   const deleteResponse = (response: ServiceResponse) => {
-    // API call or database operation to delete the service
-    // Example: apiDeleteService(service.service_id).then(refreshPage);
+    deleteServiceItem('response', response.service_response_id).then(refreshPage);
   };
   const deleteCondition = (condition: ServiceCondition) => {
-    // API call or database operation to delete the service
-    // Example: apiDeleteService(service.service_id).then(refreshPage);
+    deleteServiceItem('condition', condition.service_condition_id).then(refreshPage);
   };
   const deleteApiCall = (apiCall: ServiceAPICall) => {
-    // API call or database operation to delete the service
-    // Example: apiDeleteService(service.service_id).then(refreshPage);
+    deleteServiceItem('apicall', apiCall.service_api_call_id).then(refreshPage);
   };
 
   const confirmDeletion = () => {
@@ -437,6 +432,7 @@ export default function Services() {
         mode="create"
         itemType="service"
         onSave={handleSaveService}
+        refetch={refresh}
       />
 
       <ServiceModal
@@ -446,6 +442,7 @@ export default function Services() {
         mode="create"
         itemType="state"
         onSave={handleSaveState}
+        refetch={refresh}
       />
 
       <ServiceModal
@@ -455,6 +452,7 @@ export default function Services() {
         mode="create"
         itemType="response"
         onSave={handleSaveResponse}
+        refetch={refresh}
       />
 
       <ServiceModal
@@ -464,6 +462,7 @@ export default function Services() {
         mode="create"
         itemType="condition"
         onSave={handleSaveCondition}
+        refetch={refresh}
       />
 
       <ServiceModal
@@ -473,6 +472,7 @@ export default function Services() {
         mode="create"
         itemType="apiCall"
         onSave={handleSaveApiCall}
+        refetch={refresh}
       />
 
       <ServiceModal
@@ -483,6 +483,7 @@ export default function Services() {
         itemType="service"
         itemData={selectedService}
         onSave={handleSaveService}
+        refetch={refresh}
       />
 
       <ServiceModal
@@ -493,6 +494,7 @@ export default function Services() {
         itemType="state"
         itemData={selectedState}
         onSave={handleSaveState}
+        refetch={refresh}
       />
 
       <ServiceModal
@@ -503,6 +505,7 @@ export default function Services() {
         itemType="response"
         itemData={selectedResponse}
         onSave={handleSaveResponse}
+        refetch={refresh}
       />
 
       <ServiceModal
@@ -513,6 +516,7 @@ export default function Services() {
         itemType="condition"
         itemData={selectedCondition}
         onSave={handleSaveCondition}
+        refetch={refresh}
       />
 
       <ServiceModal
@@ -523,6 +527,7 @@ export default function Services() {
         itemType="apiCall"
         itemData={selectedApiCall}
         onSave={handleSaveApiCall}
+        refetch={refresh}
       />
 
 

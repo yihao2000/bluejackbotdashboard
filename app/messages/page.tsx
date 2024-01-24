@@ -28,10 +28,12 @@ import MessageDetail from "../components/modal/message/messagedetail";
 import CreateMessageTemplate from "../components/modal/message/CreateMessageTemplate";
 import { getMessageTemplates } from "../utils/constants";
 import { AiOutlineMessage, AiOutlineSetting } from "react-icons/ai";
+import { useSession } from "next-auth/react";
+import EditMessageTemplate from "../components/modal/message/EditMessageTemplate";
 
 type Props = {};
 
-const data: Array<MessageTemplate> = [
+const dummy: Array<MessageTemplate> = [
   {
     name: "hai",
     owner_id: "1",
@@ -62,9 +64,11 @@ const Page = (props: Props) => {
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState("");
   const [loading, setLoading] = useState(false);
-  const [templates, setTemplates] = useState<Array<MessageTemplate>>(data);
+  const [templates, setTemplates] = useState<Array<MessageTemplate>>(dummy);
   const [filteredTemplates, setFilteredTemplates] = useState<Array<MessageTemplate>>([]);
   const toast = useToast();
+
+  const { data } = useSession();
 
   const [refresh, setRefresh] = useState(false);
 
@@ -95,7 +99,7 @@ const Page = (props: Props) => {
   const fetchData = async () => {
     setLoading(true);
     try {
-      const res = await getMessageTemplates();
+      const res = await getMessageTemplates(data?.user.id || '');
       const arr: Array<MessageTemplate> = [];
       res.forEach((r: any) => {
         if (r.data_map) {
@@ -143,6 +147,16 @@ const Page = (props: Props) => {
     setModal({
       type: "add",
       data: undefined,
+      show: true,
+    });
+  };
+
+  const openEdit = (id: string) => {
+    const data = templates.find((x) => x.id === id);
+    console.log("open");
+    setModal({
+      type: "edit",
+      data: data,
       show: true,
     });
   };
@@ -226,6 +240,7 @@ const Page = (props: Props) => {
                     key={x.id}
                     data={x}
                     openDetail={openDetail}
+                    refreshPage={refreshPage}
                   />
                 );
               })
@@ -240,11 +255,22 @@ const Page = (props: Props) => {
           show={modal.show}
           data={modal.data}
           onClose={closeModal}
+          onEdit={() => openEdit(modal.data?.id || '')}
           toDelete={false}
         />
       ) : modal.type === "add" ? (
         <CreateMessageTemplate
           isOpen={modal.show}
+          refreshPage={refreshPage}
+          onClose={closeModal}
+          onFail={() => {}}
+          onSuccess={() => {}}
+        />
+      ) : modal.type === "edit" ? (
+        <EditMessageTemplate
+          templateData={modal.data || {} as MessageTemplate}
+          isOpen={modal.show}
+          refreshPage={refreshPage}
           onClose={closeModal}
           onFail={() => {}}
           onSuccess={() => {}}

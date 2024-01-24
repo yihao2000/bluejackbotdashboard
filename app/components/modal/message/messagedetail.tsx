@@ -3,11 +3,13 @@ import { Box, Button, Divider, Flex, Text, Wrap, WrapItem } from "@chakra-ui/rea
 import React from "react";
 import ModalTemplate from "../ModalTemplate";
 import { parseContent } from "@/app/utils/formatter";
+import { useSession } from "next-auth/react";
 
 type Props = {
   data: MessageTemplate | undefined;
   show: boolean;
   onClose: () => void;
+  onEdit: () => void;
   toDelete: boolean;
 };
 
@@ -17,6 +19,8 @@ const MessageDetail = (props: Props) => {
       <span>Template Details</span>
     </Flex>
   );
+
+  const { data } = useSession();
 
   const body = (
     <Box className="flex gap-2 flex-col p-2">
@@ -40,13 +44,11 @@ const MessageDetail = (props: Props) => {
                 my="1" 
                 bg="blue.50"
             >
-              <Wrap>
                 {parseContent(props.data.raw_content).map((element, index) => (
-                    <WrapItem key={index}>
-                        {typeof element === 'string' ? <Text fontSize={["xs","sm"]}>{element}</Text> : element}
-                    </WrapItem>
+                    <>
+                        {element}
+                    </>
                 ))}
-              </Wrap>
             </Box>
             </Box>
           </Box>
@@ -60,17 +62,24 @@ const MessageDetail = (props: Props) => {
             </Box>
           ) : null}
 
-          {props.data.data_map.size > 0 ? (
+          {/* {props.data.data_map.size > 0 ? (
             <Box display={"flex"} flexDirection={"column"} width={"100%"}>
               <Box fontWeight={"semibold"}>Template Variables</Box>
               {Array.from(props.data.data_map.keys()).map((key, i) => (
                 <Text>{`${key} -> ${props.data?.data_map.get(key)}`}</Text>
               ))}
             </Box>
-          ) : null}
+          ) : null} */}
 
-          <Divider p="2" />
-          <Button colorScheme="blue">Use</Button>
+          {(data?.user.id && data?.user.id == props.data.owner_id) &&
+            <Button
+              colorScheme="blue"
+              onClick={() => props.onEdit()}
+            >
+              Edit
+            </Button>
+          }
+          
         </>
       ) : (
         <Text>

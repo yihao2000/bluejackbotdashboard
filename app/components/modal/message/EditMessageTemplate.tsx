@@ -17,10 +17,11 @@ import {
 import React, { SyntheticEvent, useState } from "react";
 import ModalTemplate from "../ModalTemplate";
 import { AiOutlinePlus } from "react-icons/ai";
-import { createMessageTemplate } from "@/app/utils/constants";
+import { createMessageTemplate, updateMessageTemplate } from "@/app/utils/constants";
 import { useSession } from "next-auth/react";
 
 type Props = {
+  templateData: FormData;
   isOpen: boolean;
   onClose: () => void;
   onSuccess: (data: MessageTemplate) => void;
@@ -34,25 +35,27 @@ type ParamType = {
 };
 
 type FormData = {
+  id: string;
   name: string;
   category: string;
-  content: string;
-  is_global: boolean;
+  raw_content: string;
+  is_shared: number;
   // data_map: Map<string, string>;
 };
 
 const defaultData = {
+  id: "",
   name: "",
   category: "",
-  content: "",
-  is_global: false,
+  raw_content: "",
+  is_shared: 0,
   // data_map: new Map<string, string>(),
 };
 
-const fixedParams = ["Class Name", "Course Code", "Course Name"];
+const fixedParams = ["Class Code", "Class Name", "Course Code", "Course Name"];
 
-const CreateMessageTemplate = (props: Props) => {
-  const [formData, setFormData] = useState<FormData>(defaultData);
+const EditMessageTemplate = (props: Props) => {
+  const [formData, setFormData] = useState<FormData>(props.templateData);
   const [loading, setLoading] = useState(false);
   const [param, setParam] = useState<ParamType>({
     name: "",
@@ -105,11 +108,12 @@ const CreateMessageTemplate = (props: Props) => {
     setLoading(true);
 
     try {
-      await createMessageTemplate(
+      await updateMessageTemplate(
+        submitData.id,
         submitData.name,
-        submitData.content,
+        submitData.raw_content,
         map,
-        submitData.is_global,
+        submitData.is_shared == 1,
         submitData.category,
         data?.user.id
       );
@@ -140,13 +144,13 @@ const CreateMessageTemplate = (props: Props) => {
       setError("Fields should be filled!");
       return;
     }
-    const { isDuplicate, map: data_map } = isDuplicateParams(formData.content);
+    const { isDuplicate, map: data_map } = isDuplicateParams(formData.raw_content);
     if (isDuplicate) {
       setError("Content params should be unique!");
       return;
     }
   
-    const processedContent = formData.content.replace(/\n/g, "\\n");
+    const processedContent = formData.raw_content.replace(/\n/g, "\\n");
   
     const submitData = {
       ...formData,
@@ -176,10 +180,10 @@ const CreateMessageTemplate = (props: Props) => {
       "messageContent"
       ) as HTMLTextAreaElement;
       const cursorPos = textArea.selectionStart;
-      const prefix = formData.content.substring(0, cursorPos);
-      const suffix = formData.content.substring(
+      const prefix = formData.raw_content.substring(0, cursorPos);
+      const suffix = formData.raw_content.substring(
         cursorPos,
-        formData.content.length
+        formData.raw_content.length
         );
         const type = "#" + (param.type === "free" ? "free" : "fixed:" + param.type);
         const newString =
@@ -197,7 +201,7 @@ const CreateMessageTemplate = (props: Props) => {
       
       const header = (
         <Flex alignItems="center" gap={2}>
-          <span>New Message Template</span>
+          <span>Edit Message Template</span>
         </Flex>
       );
       const body = (
@@ -215,10 +219,10 @@ const CreateMessageTemplate = (props: Props) => {
 
       <HStack>
         <Box>Global Template (shared to others)</Box>
-        <Switch isChecked={formData.is_global} onChange={(e) =>
+        <Switch isChecked={formData.is_shared == 1} onChange={(e) =>
               setFormData(() => ({
                 ...formData,
-                is_global: e.target.checked,
+                is_shared: e.target.checked ? 1 : 0,
               }))
             }/>
       </HStack>
@@ -237,11 +241,11 @@ const CreateMessageTemplate = (props: Props) => {
       <Box>Content</Box>
       <Textarea
         id="messageContent"
-        value={formData.content}
+        value={formData.raw_content}
         onChange={(e) =>
           setFormData(() => ({
             ...formData,
-            content: e.target.value,
+            raw_content: e.target.value,
           }))
         }
       />
@@ -303,7 +307,7 @@ const CreateMessageTemplate = (props: Props) => {
           isLoading={loading}
           loadingText="Creating..."
         >
-          Create
+          Save
         </Button>
       </Box>
     </Box>
@@ -320,4 +324,4 @@ const CreateMessageTemplate = (props: Props) => {
   );
 };
 
-export default CreateMessageTemplate;
+export default EditMessageTemplate;

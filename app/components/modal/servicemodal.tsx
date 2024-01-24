@@ -1,3 +1,5 @@
+import { ServiceAPICall, ServiceCondition, ServiceState } from "@/app/interfaces/interfaces";
+import { queryServiceApiCalls, queryServiceConditions, queryServiceStates } from "@/app/utils/constants";
 import {
     Modal,
     ModalOverlay,
@@ -15,6 +17,8 @@ import {
     useToast,
     Stack,
     Divider,
+    RadioGroup,
+    Radio,
   } from "@chakra-ui/react";
   import { useEffect, useState } from "react";
   
@@ -26,6 +30,7 @@ import {
     itemData?: any;
     onSave: (data: any) => void;
     refreshPage: () => void;
+    refetch: boolean;
   }
   
   export const ServiceModal: React.FC<ServiceModalProps> = ({
@@ -35,33 +40,57 @@ import {
     itemType,
     itemData,
     onSave,
-    refreshPage
+    refreshPage,
+    refetch
   }) => {
     const [formData, setFormData] = useState<any>({
         service_state_input_options: ';'
       });
     const toast = useToast();
+    const [stateValueEntryMethod, setStateValueEntryMethod] = useState('enterStateValue');
+    const [responseType, setResponseType] = useState(formData.service_response_type || 'FINISH');
+
+    const [states, setStates] = useState<ServiceState[]>([]);
+    const [conditions, setConditions] = useState<ServiceCondition[]>([]);
+    const [apiCalls, setApiCalls] = useState<ServiceAPICall[]>([]);
+    
+    useEffect(() => {
+      queryServiceStates().then((res) => {
+        setStates(res);
+      });
+      queryServiceConditions().then((res) => {
+        setConditions(res);
+      });
+      queryServiceApiCalls().then((res) => {
+        setApiCalls(res);
+      });
+    }, [refetch])
   
     useEffect(() => {
-        if (mode === "edit" && itemData) {
-          setFormData(itemData);
-        }
-    }, [mode, itemData]);
+      if (mode === "edit" && itemData) {
+        setFormData(itemData);
+        const isApiCall = isApiCallFormat(itemData.service_state_message);
+        setStateValueEntryMethod(isApiCall ? 'useApiResponse' : 'enterStateValue');
+        setResponseType(itemData.service_response_type || 'FINISH');
+      }
+    }, [mode, itemData, states, conditions, apiCalls]);
+
+    const handleResponseTypeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+      setResponseType(e.target.value);
+      handleChange(e);
+   };
+    
+    const handleApiCallSelection = (e: React.ChangeEvent<HTMLSelectElement>) => {
+      const apiCallId = e.target.value;
+      setFormData({ ...formData, service_state_message: `$API_CALL{"${apiCallId}"}`, service_state_api_call_id: apiCallId });
+    };
   
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
       setFormData({ ...formData, [e.target.name]: e.target.value });
     };
   
     const handleSave = () => {
-      // Validation and save logic goes here
       onSave(formData);
-      toast({
-        title: "Success",
-        description: `${itemType.charAt(0).toUpperCase() + itemType.slice(1)} ${mode}d successfully!`,
-        status: "success",
-        duration: 5000,
-        isClosable: true,
-      });
       onClose();
     };
 
@@ -82,8 +111,19 @@ import {
         optionsArray[index] = value;
         setFormData({ ...formData, service_state_input_options: optionsArray.join(';') });
     };
-      
-      
+
+    const handleRadioChange = (e : string) => {
+      setStateValueEntryMethod(e);
+    };
+
+    const isApiCallFormat = (value : string) => {
+      return /^\$API_CALL\{"[^"]+"\}$/.test(value);
+    };
+    
+    const extractApiCallId = (value: string) => {
+      const match = value.match(/^\$API_CALL\{"([^"]+)"\}$/);
+      return match ? match[1] : '';
+    };
   
     const renderFormFields = () => {
         switch (itemType) {
@@ -92,20 +132,48 @@ import {
               <>
                 <Input placeholder="Service Name" name="service_name" value={formData.service_name || ''} onChange={handleChange} />
                 <Select placeholder="Select Initial State" name="initial_state_id" value={formData.initial_state_id || ''} onChange={handleChange}>
-                  {/* Options for initial state */}
+                  {states.map((state) => (
+                    <option key={state.service_state_id} value={state.service_state_id}>({state.service_state_type}) {state.service_state_name}</option>
+                  ))}
                 </Select>
                 <Box display="flex" alignItems="center">
-                  <Switch isChecked={formData.is_enabled} onChange={(e) => handleChange(e as any)} name="is_enabled" />
+                  <Switch isChecked={formData.is_enabled == 1} 
+                  onChange={(e) => setFormData({ ...formData, is_enabled: e.target.checked ? 1 : 0 })}  name="is_enabled" />
                   <Box ml={2}>Enable/Disable Service</Box>
                 </Box>
               </>
             );
       
           case "state":
+            const selectedApiCallId = stateValueEntryMethod === 'useApiResponse' ? extractApiCallId(formData.service_state_message) : '';
             return (
               <>
                 <Input placeholder="State Name" name="service_state_name" value={formData.service_state_name || ''} onChange={handleChange} />
-                <Textarea placeholder="State Message / Value" name="service_state_message" value={formData.service_state_message || ''} onChange={handleChange} />
+
+                <RadioGroup onChange={handleRadioChange} value={stateValueEntryMethod}>
+                  <Stack direction="row">
+                    <Radio value="enterStateValue">Enter State Value</Radio>
+                    <Radio value="useApiResponse">Use API Response</Radio>
+                  </Stack>
+                </RadioGroup>
+
+                {stateValueEntryMethod === 'enterStateValue' && (
+                  <Textarea placeholder="State Message / Value" name="service_state_message" value={formData.service_state_message || ''} onChange={handleChange} />
+                )}
+
+                {stateValueEntryMethod === 'useApiResponse' && (
+                  <Select 
+                    placeholder="Choose API Call" 
+                    name="service_state_api_call_id" 
+                    value={selectedApiCallId || ''} 
+                    onChange={handleApiCallSelection}
+                  >
+                    {apiCalls.map((apiCall) => (
+                      <option key={apiCall.service_api_call_id} value={apiCall.service_api_call_id}>{apiCall.http_method} to {apiCall.api_endpoint} with payload: {apiCall.payload}</option>
+                    ))}
+                  </Select>
+                )}
+                
                 <Select placeholder="Select State Type" name="service_state_type" value={formData.service_state_type || ''} onChange={handleChange}>
                     <option value="INPUT_FREETEXT">(Input) Free Text</option>
                     <option value="INPUT_WITHOPTIONS">(Input) Options</option>
@@ -142,23 +210,39 @@ import {
               <>
                 <Input placeholder="Response Name" name="service_response_name" value={formData.service_response_name || ''} onChange={handleChange} />
                 <Select placeholder="Select the state this response belongs to" name="service_response_state_id" value={formData.service_response_state_id || ''} onChange={handleChange}>
-                  {/* Options for response state */}
+                  {states.map((state) => (
+                    <option key={state.service_state_id} value={state.service_state_id}>({state.service_state_type}) {state.service_state_name}</option>
+                  ))}
                 </Select>
                 <Divider/>
                 <Select placeholder="Select the condition this response depends on" name="service_response_condition_id" value={formData.service_response_condition_id || ''} onChange={handleChange}>
-                  {/* Options for response condition */}
+                  {conditions.map((condition) => (
+                    <option key={condition.service_condition_id} value={condition.service_condition_id}>{condition.service_condition_name}</option>
+                  ))}
                 </Select>
                 <Box display="flex" alignItems="center">
-                  <Box ml={2} mr={2}>Execute if the condition returns {formData.service_response_condition_value ? 'TRUE' : 'FALSE'}</Box>
-                  <Switch isChecked={formData.service_response_condition_value} onChange={(e) => handleChange(e as any)} name="service_response_condition_value" />
+                  <Box ml={2} mr={2}>Execute if the condition returns {formData.service_response_condition_value == 'true' ? 'TRUE' : 'FALSE'}</Box>
+                  <Switch 
+                      isChecked={formData.service_response_condition_value == 'true'}
+                      onChange={(e) => setFormData({ ...formData, service_response_condition_value: e.target.checked ? 'true' : 'false' })} 
+                      name="service_response_condition_value" 
+                  />
                 </Box>
                 <Divider/>
-                <Select placeholder="Select Response Type" name="service_response_type" value={formData.service_response_type || ''} onChange={handleChange}>
+                <Select placeholder="Select Response Type" name="service_response_type" value={responseType} onChange={handleResponseTypeChange}>
                     <option value="JUMP_TO_STATE">Change to another state</option>
                     <option value="FINISH">Finish service execution</option>
                 </Select>
-                <Input placeholder="Response Value" name="service_response_value" value={formData.service_response_value || ''} onChange={handleChange} />
-              </>
+                  {responseType === "JUMP_TO_STATE" ? (
+                          <Select placeholder="Select destination state" name="service_response_value" value={formData.service_response_value || ''} onChange={handleChange}>
+                              {states.map((state) => (
+                                  <option key={state.service_state_id} value={state.service_state_id}>({state.service_state_type}) {state.service_state_name}</option>
+                              ))}
+                          </Select>
+                      ) : (
+                          <Input placeholder="Response Value" name="service_response_value" value={formData.service_response_value || ''} onChange={handleChange} />
+                      )}
+                </>
             );
       
           case "condition":

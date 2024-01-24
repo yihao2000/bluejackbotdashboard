@@ -8,21 +8,58 @@ import {
   CardBody,
   CardFooter,
   CardHeader,
+  CloseButton,
   Divider,
   Heading,
   Text,
+  useDisclosure,
 } from "@chakra-ui/react";
+import { ConfirmationModal } from "../modal/confirmationmodal";
+import { deleteAutoResponse } from "@/app/utils/constants";
 
 type Props = {
   data: AutoResponse;
   openDetail: (id: string) => void;
+  refreshPage: () => void;
 };
 
 const AutoResponseCard = (props: Props) => {
+    const confirmationModalDisclosure = useDisclosure();
+
+    function openDeleteModal() {
+      confirmationModalDisclosure.onOpen();
+    }
+  
+    const handleDeleteButtonClick = () => {
+      openDeleteModal();
+    };
+  
+    const handleDeleteAutoResponse = (): Promise<void> => {
+      return new Promise<void>((resolve, reject) => {
+        deleteAutoResponse(props.data.id)
+          .then(() => {
+            resolve();
+          })
+          .catch((err : any) => {
+            console.error(err);
+            reject(err);
+          });
+      });
+    };
+
   return (
     <Card className="hover:cursor-pointer hover:scale-105 transition" size="md">
         <CardHeader>
             <Heading size={["sm","md"]}>{props.data.name}</Heading>
+            <CloseButton
+                size="sm"
+                position="absolute"
+                top="1rem"
+                right="1rem"
+                onClick={() => {
+                handleDeleteButtonClick();
+                }}
+            />
         </CardHeader>
         <CardBody py={0}>
             <Box 
@@ -32,6 +69,7 @@ const AutoResponseCard = (props: Props) => {
                 p="4" 
                 my="2" 
                 bg="blue.50"
+                whiteSpace={'pre-wrap'}
             >
                 <Text 
                     fontSize={{ base: "xs", md: "sm" }} 
@@ -68,6 +106,15 @@ const AutoResponseCard = (props: Props) => {
             Details
             </Button>
         </CardFooter>
+        <ConfirmationModal
+            {...confirmationModalDisclosure}
+            title="Delete Confirmation"
+            description="Are you sure you want to delete selected auto response?"
+            action={handleDeleteAutoResponse}
+            refreshPage={props.refreshPage}
+            successMessage="Auto response successfully deleted!"
+            errorMessage="Failed to delete auto response!"
+        />
     </Card>
 );
 };
