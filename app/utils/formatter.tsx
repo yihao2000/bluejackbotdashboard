@@ -277,7 +277,7 @@ export function transformChannelData(data: any[]): Channel[] {
     const originalDate = new Date(dateString);
   
     // Add 7 hours to the date
-    originalDate.setHours(originalDate.getHours() + 7);
+    originalDate.setHours(originalDate.getHours());
   
     // Manually build the formatted date string
     const daysOfWeek = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];

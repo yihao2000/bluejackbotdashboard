@@ -1,4 +1,5 @@
 import {
+  Badge,
   Box,
   Button,
   Card,
@@ -49,6 +50,7 @@ import { MdOutlineDescription } from "react-icons/md";
 import { MdOutlineSensorDoor } from "react-icons/md";
 import ChannelDetailModal from "../modal/channeldetailmodal";
 import { ConfirmationModal } from "../modal/confirmationmodal";
+import { GroupedClasses } from "../modal/autoresponsedetailmodal";
 
 interface Data {
   channel: Channel;
@@ -64,6 +66,19 @@ export default function ChannelDetailCard(props: Data) {
 
   const [isLoading, setIsLoading] = useState(false);
   const toast = useToast();
+
+  const groupClassesBySubject = (classList: RoomClass[]): GroupedClasses => {
+    const grouped: GroupedClasses = {};
+    classList.forEach((item) => {
+      if (!grouped[item.subject]) {
+        grouped[item.subject] = [];
+      }
+      grouped[item.subject].push(item.class);
+    });
+    return grouped;
+  };
+
+  const groupedClasses = groupClassesBySubject(studentClassList);
 
   useEffect(() => {
     if (props.channel.channel_subscribers[0] != null) {
@@ -163,21 +178,40 @@ export default function ChannelDetailCard(props: Data) {
             {props.channel.channel_description}
           </Text>
         </Box>
-        <Box display="flex" className="items-center gap-2" flexWrap="wrap">
-          <MdOutlineMeetingRoom />
-          {isLoading ? (
-            <Skeleton width="20" height="20px" />
-          ) : studentClassList.length > 0 ? (
-            studentClassList.map((x) => (
-              <Text fontSize="sm" m="0" p="0" key={x.id as React.Key}>
-                {x.class}
-              </Text>
-            ))
-          ) : (
-            <Text color="gray" fontSize="sm">
-              -
-            </Text>
-          )}
+        <Box className="gap-3" mt={4} maxHeight={200} overflowY={'auto'} borderRadius={10}>
+            {isLoading ? (
+                <Skeleton width="80" height="80px" />
+            ) : Object.keys(groupedClasses).length > 0 ? (
+                Object.entries(groupedClasses).map(([subject, classes]) => (
+                    <Box
+                        p={3}
+                        boxShadow="md"
+                        borderWidth="1px"
+                        borderRadius="lg"
+                        overflow="hidden"
+                        mb={3}
+                        bg="white"
+                        key={subject}
+                    >
+                        <Text fontWeight="bold" fontSize="md">{subject}</Text>
+                        <Box
+                        display="flex"
+                        flexWrap="wrap">
+                            {classes.map((className: string, index: number) => (
+                                <Badge m={1} colorScheme="twitter">
+                                    <Text fontSize="sm" key={index}>
+                                        {className}
+                                    </Text>
+                                </Badge>
+                            ))}
+                        </Box>
+                    </Box>
+                ))
+            ) : (
+                <Text color="gray" fontSize="sm">
+                    No classes selected
+                </Text>
+            )}
         </Box>
       </CardBody>
       <CardFooter>
