@@ -180,7 +180,7 @@ export default function ChannelDetailCard(props: Data) {
         </Box>
         <Box className="gap-3" mt={4} maxHeight={200} overflowY={'auto'} borderRadius={10}>
             {isLoading ? (
-                <Skeleton width="80" height="80px" />
+                <Skeleton width="100" height="80px" />
             ) : Object.keys(groupedClasses).length > 0 ? (
                 Object.entries(groupedClasses).map(([subject, classes]) => (
                     <Box

@@ -532,7 +532,7 @@ export default function Classes() {
               <option value="schedulemessage">Schedule a message</option>
             </Select>
 
-            {selectedOption != "" && (
+            {selectedOption != "" && session.data?.user.role == 'admin' && (
               <>
                 <Text>
                   Pick <b>channels</b> that you want to perform selected action
@@ -556,9 +556,14 @@ export default function Classes() {
                     })}
                   </Box>
                 ) : (
-                  <Text>sadsa</Text>
+                  <Text>loading..</Text>
                 )}
                 <Box></Box>{" "}
+              </>
+              )}
+
+              {selectedOption != "" && (
+              <>
                 <Text>
                   Pick <b>classes</b> that you want to perform selected action
                 </Text>

@@ -1,4 +1,4 @@
-import { USER_LOGIN_QUERY } from '@/app/utils/constants';
+import { USER_LOGIN_QUERY, queryValidateAdminAccess } from '@/app/utils/constants';
 import type { NextAuthOptions } from 'next-auth'
 import CredentialsProvider from "next-auth/providers/credentials";
 
@@ -42,20 +42,25 @@ export const options: NextAuthOptions = {
                     }
 
                     const data = await response.json();
+
+                    const adminCheck = await queryValidateAdminAccess(data.response["a:UserName"]);
                  
                     if (data.response != "") {
                         const user = {
                             id: data.response["a:UserId"],
                             name: data.response["a:Name"],
-                            role: data.response["a:Role"],
+                            role: adminCheck.status == true ? 'admin' : 'user',
                             username: data.response["a:UserName"],
                         };
+
+                        console.log("login success")
                         
                         return user;
                     } else {
                         throw new Error("Invalid Username / Password");
                     }
                 } catch (error: any) {
+                    console.log(JSON.stringify(error));
                     if (error.message === 'fetch failed') {
                         throw new Error("Cannot connect to the server");
                     }

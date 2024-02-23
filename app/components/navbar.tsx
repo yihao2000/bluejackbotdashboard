@@ -43,7 +43,7 @@ import React, { ReactNode, useEffect, useState } from "react";
 import Link from "next/link";
 
 import { usePathname, useRouter } from "next/navigation";
-import { signOut } from "next-auth/react";
+import { signOut, useSession } from "next-auth/react";
 import { Semester } from "../interfaces/interfaces";
 import { useSemester } from "../context/SemesterContext";
 import { MdAnnouncement, MdAutoMode, MdOutlineAnnouncement, MdOutlineAutoAwesome, MdOutlineAutoMode, MdOutlineSpeakerGroup } from "react-icons/md";
@@ -71,14 +71,22 @@ interface SidebarProps extends BoxProps {
 const LinkItems: Array<LinkItemProps> = [
   { name: "Home", icon: FiHome, href: "/" },
   { name: "Classes", icon: FiTrendingUp, href: "/classes" },
-  { name: "Services", icon: FiCompass, href: "/services" },
   { name: "Templates", icon: AiOutlineMessage, href: "/messages" },
   { name: "Auto Responses", icon: MdOutlineAutoMode, href: "/responder" },
-  { name: "Channels", icon: GoBroadcast, href: "/channels" },
-  { name: "Actions", icon: MdOutlineAnnouncement, href: "/actions" },
 ];
 
+const AdminItems: Array<LinkItemProps> = [
+  { name: "Services", icon: FiCompass, href: "/services" },
+  { name: "Channels", icon: GoBroadcast, href: "/channels" }
+]
+
+const SpecialItems: Array<LinkItemProps> = [
+  { name: "Actions", icon: MdOutlineAnnouncement, href: "/actions" },
+]
+
 const SidebarContent = ({ onClose, ...rest }: SidebarProps) => {
+  const session = useSession();
+
   return (
     <Box
       paddingTop="24"
@@ -103,6 +111,29 @@ const SidebarContent = ({ onClose, ...rest }: SidebarProps) => {
           {
             link.name === 'Actions' && <Divider mt={4} mb={4} />
           }
+          <NavItem icon={link.icon} href={link.href} key={link.href}>
+          <Text fontSize={link.name === 'Actions' ? 'lg' : ''} fontWeight={link.name === 'Actions' ? 'bold' : ''}>{link.name}</Text>
+        </NavItem>
+        </>
+        
+      ))}
+      {
+        session.data?.user.role! == 'admin' && <Divider mt={4} mb={4} />
+      }
+      {
+        session.data?.user.role! == 'admin' &&
+        AdminItems.map((link : any) => (
+          <>
+            <NavItem icon={link.icon} href={link.href} key={link.href}>
+            <Text fontSize={link.name === 'Actions' ? 'lg' : ''} fontWeight={link.name === 'Actions' ? 'bold' : ''}>{link.name}</Text>
+          </NavItem>
+          </>
+          
+        ))
+      }
+      <Divider mt={4} mb={4} />
+      {SpecialItems.map((link) => (
+        <>
           <NavItem icon={link.icon} href={link.href} key={link.href}>
           <Text fontSize={link.name === 'Actions' ? 'lg' : ''} fontWeight={link.name === 'Actions' ? 'bold' : ''}>{link.name}</Text>
         </NavItem>

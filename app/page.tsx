@@ -38,6 +38,7 @@ import ScheduledMessageCard from "./components/cards/scheduledmessagecard";
 
 export default function Home() {
   const session = useSession();
+
   const confirmationModalDisclosure = useDisclosure();
 
   const [scheduledMessages, setScheduledMessages] = useState<

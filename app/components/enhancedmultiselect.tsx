@@ -1,6 +1,7 @@
 import { AutoResponse, Channel, Class, ClassLineGroup } from "@/app/interfaces/interfaces";
 import { useState } from 'react';
 import { Box, Menu, MenuButton, MenuList, MenuItem, Checkbox, Button, Text } from '@chakra-ui/react';
+import { useSession } from "next-auth/react";
 
 interface EnhancedMultiSelectProps {
     selectedClasses: string[],
@@ -31,7 +32,8 @@ const EnhancedMultiSelect: React.FC<EnhancedMultiSelectProps> = ({ selectedClass
         setSelectedChannels(updatedSelectedChannels);
         handleRecipientChange(selectedClasses, updatedSelectedChannels);
     };
-    
+
+    const session = useSession();
 
     return (
         <Box>
@@ -50,20 +52,28 @@ const EnhancedMultiSelect: React.FC<EnhancedMultiSelectProps> = ({ selectedClass
                 </MenuList>
             </Menu>
             
-            <Box mt={2}>(Admin Only) Enabled Channels</Box>
-            <Menu closeOnSelect={false}>
-                <MenuButton as={Button} width={"100%"} backgroundColor={"white"} border="1px solid gray">
-                    {selectedChannels.length} Channels Selected
-                </MenuButton>
-                <MenuList>
-                    {channels.map((c) => (
-                        <MenuItem key={c.channel_id} onClick={() => handleChannelsChange(c.channel_id)}>
-                            <Checkbox isChecked={selectedChannels.includes(c.channel_id)} onChange={() => handleChannelsChange(c.channel_id)}/>
-                            <Text ml={5}>{c.channel_name} [{c.channel_subscribers.length} classes]</Text>
-                        </MenuItem>
-                    ))}
-                </MenuList>
-            </Menu>
+            {
+                session.data!.user.role! == 'admin' &&
+                <Box mt={2}>(Admin Only) Enabled Channels</Box>
+            }
+            
+            {
+                session.data!.user.role! == 'admin' &&
+                <Menu closeOnSelect={false}>
+                    <MenuButton as={Button} width={"100%"} backgroundColor={"white"} border="1px solid gray">
+                        {selectedChannels.length} Channels Selected
+                    </MenuButton>
+                    <MenuList>
+                        {channels.map((c) => (
+                            <MenuItem key={c.channel_id} onClick={() => handleChannelsChange(c.channel_id)}>
+                                <Checkbox isChecked={selectedChannels.includes(c.channel_id)} onChange={() => handleChannelsChange(c.channel_id)}/>
+                                <Text ml={5}>{c.channel_name} [{c.channel_subscribers.length} classes]</Text>
+                            </MenuItem>
+                        ))}
+                    </MenuList>
+                </Menu>
+            }
+            
         </Box>
     );
 };

@@ -164,11 +164,14 @@ const EditAutoResponse = (props: Props) => {
       setChannelLoading(true);
   
       loadAssistantClasses();
-      loadChannels();
+
+      if(session.data?.user.role! == 'admin'){
+        loadChannels();
+      }
     };
 
     useEffect(() => {
-        if (classes.length > 0 && channels.length > 0) {
+        if (classes.length > 0) {
           const recipientClassIds = new Set(formData.trigger_recipients.split(','));
           let newSelectedChannels: string[] = [];
           let newSelectedClasses: string[] = [];
@@ -336,6 +339,7 @@ const EditAutoResponse = (props: Props) => {
           backgroundColor={"white"}
           width={"100%"}
           defaultValue="all"
+          value={formData.trigger_type.toLowerCase()}
           onChange={(event) =>
             setFormData({
               ...formData,

@@ -34,6 +34,7 @@ function LoginBox() {
         res.salt + username,
         password
       );
+      console.log(encPass);
       const result = await signIn("credentials", {
         username: username,
         password: encPass,

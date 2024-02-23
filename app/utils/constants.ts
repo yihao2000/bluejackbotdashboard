@@ -1,7 +1,7 @@
 import { Item, Service, ServiceAPICall, ServiceCondition, ServiceResponse, ServiceState } from "../interfaces/interfaces";
 
-export const API_URL = "http://bluejackbot.jex.ink:3001";
-// export const API_URL = "http://localhost:3001";
+// export const API_URL = "https://api.bjb-dashboard.jex.ink";
+export const API_URL = "http://localhost:3001";
 
 export const CLASSES_DETAIL_QUERY = `${API_URL}/classes/query/classesdetail`;
 export const LINKED_CLASSES_QUERY = `${API_URL}/classes/query/linkedclasses`;
@@ -18,6 +18,8 @@ export const CHECK_CLASS_LINKED_QUERY = `${API_URL}/classes/checkclasslinked`;
 export const ANNOUNCE_MESSAGE = `${API_URL}/classes/announceclassesmessage`;
 export const SCHEDULE_MESSAGE = `${API_URL}/classes/scheduleclassesmessage`;
 export const CHANNELS_QUERY = `${API_URL}/channels/getchannels`;
+
+export const ADMIN_VALIDATION_QUERY = `${API_URL}/users/authorizeadmin`;
 
 export const SERVICES_QUERY = `${API_URL}/services/getservices`;
 export const SERVICE_STATES_QUERY = `${API_URL}/services/getstates`;
@@ -297,6 +299,33 @@ export const queryChannels = async () => {
     throw new Error("Error fetching data");
   }
   return await response.json();
+};
+
+export const queryValidateAdminAccess = async (username: string) => {
+  try {
+    const response = await fetch(ADMIN_VALIDATION_QUERY, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ username }),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(`API request failed: ${errorData.message}`);
+    }
+    const data = await response.json();
+    // Handle the API response data here
+    console.log(data);
+
+    return data;
+  } catch (error) {
+    console.error("API Error:", error);
+    // Re-throw the error to propagate it
+
+    throw error;
+  }
 };
 
 export const queryServices = async () => {
@@ -847,14 +876,14 @@ export const addChannelSubscribers = async (
 };
 
 export const removeChannel = async (
-  channelId: String,
+  channelID: String,
 ) => {
   const response = await fetch(DELETE_CHANNEL, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
     },
-    body: JSON.stringify({ channelId }),
+    body: JSON.stringify({ channelID }),
   });
 
   if (!response.ok) {
